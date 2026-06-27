@@ -1095,6 +1095,26 @@ const SUPABASE_KEY = 'sb_publishable_XZhQej7SCpZZQAjN2huBWQ_WxNDWnh2';
 let _sb = null;
 let _usuario = null;
 let _authTab = 'login';
+let _bancoDB = []; // filas crudas de preguntas_banco (para el admin)
+
+async function inicializarPreguntas() {
+  if (!_sb) return;
+  try {
+    const { data, error } = await _sb.from('preguntas_banco').select('*').eq('activa', true).order('orden');
+    if (error || !data || data.length === 0) return;
+    _bancoDB = data;
+    const mc   = data.filter(r => r.tipo === 'mc');
+    const fl   = data.filter(r => r.tipo === 'flash');
+    const vf   = data.filter(r => r.tipo === 'vf');
+    const cp   = data.filter(r => r.tipo === 'completar');
+    if (mc.length)  preguntas          = mc.map(r => ({ id:r.id, tema:r.tema, p:r.texto, ops:r.opciones, r:r.correcta, exp:r.explicacion }));
+    if (fl.length)  flashcards         = fl.map(r => ({ id:r.id, tema:r.tema, p:r.texto, r:r.respuesta }));
+    if (vf.length)  preguntasVF        = vf.map(r => ({ id:r.id, tema:r.tema, p:r.texto, r:!!r.correcta, exp:r.explicacion }));
+    if (cp.length)  preguntasCompletar = cp.map(r => ({ id:r.id, tema:r.tema, texto:r.texto, ops:r.opciones, r:r.correcta, exp:r.explicacion }));
+  } catch(e) {
+    console.warn('Usando banco de preguntas local (fallback):', e.message);
+  }
+}
 
 function initSupabase() {
   try {
@@ -1235,7 +1255,7 @@ async function guardarEnSupabase(prog) {
 // =========================================
 // BANCO DE PREGUNTAS (con tema y id únicos)
 // =========================================
-const preguntas = [
+let preguntas = [
   // GASES
   { id:'g1', tema:'gases', p:"¿Cuál es el principal componente del Gas Natural?", ops:["Propano (C3H8)","Butano (C4H10)","Metano (CH4) en un 95-98%","Hidrógeno"], r:2, exp:"El Gas Natural está compuesto principalmente por METANO en un 95 a 98%. El metano liberado a la atmósfera es aprox. 16 veces más contaminante que los gases de su combustión." },
   { id:'g2', tema:'gases', p:"¿Cuál es el poder calorífico del Gas Grado 1 (Propano)?", ops:["9.300 Kcal/m³","13.000 Kcal/m³","22.380 Kcal/m³","27.482 Kcal/m³"], r:2, exp:"El Gas Grado 1 (Propano) tiene un poder calorífico de 22.380 Kcal/m³. El GN tiene ~9.300 Kcal/m³ y el Gas Grado 3 (Butano) tiene 27.482 Kcal/m³." },
@@ -1298,7 +1318,7 @@ const preguntas = [
 // =========================================
 // FLASHCARDS
 // =========================================
-const flashcards = [
+let flashcards = [
   { id:'fl1',  tema:'gases', p:"Fórmula del Propano y características", r:"C₃H₈ (Gas Grado 1) · Líquido a -44°C · Presión utilización: 280 mmca · Poder calorífico: 22.380 Kcal/m³ · Densidad: 1,52 · Cilindros de 45 kg = 24 m³ gas" },
   { id:'fl2',  tema:'gases', p:"Fórmula del Butano y características", r:"C₄H₁₀ (Gas Grado 3) · Líquido a -17°C · Presión utilización: 320 mmca · Poder calorífico: 27.482 Kcal/m³ · Densidad: 1,91 · Garrafas de 10 y 15 kg" },
   { id:'fl3',  tema:'gases', p:"¿Qué es la Combustión?", r:"Combinación rápida de un combustible con oxígeno, con producción de calor y luz. Productos NO tóxicos: CO₂, vapor de agua y N₂. El CO (monóxido de carbono) SÍ es tóxico (combustión incompleta)." },
@@ -1331,7 +1351,7 @@ const flashcards = [
 // =========================================
 // VERDADERO / FALSO
 // =========================================
-const preguntasVF = [
+let preguntasVF = [
   { id:'vf1',  tema:'gases',        p:'El metano (CH₄) representa el 95-98% del Gas Natural.',                             r:true,  exp:'Correcto. El Gas Natural es casi totalmente metano.' },
   { id:'vf2',  tema:'gases',        p:'El Gas Grado 3 (Butano) tiene densidad 1,52.',                                      r:false, exp:'Falso. Densidad del Butano es 1,91. La densidad 1,52 es del Propano (Grado 1).' },
   { id:'vf3',  tema:'gases',        p:'El Propano pasa a estado líquido a -44°C.',                                         r:true,  exp:'Correcto. El Propano (C₃H₈) se licúa a -44°C.' },
@@ -1357,7 +1377,7 @@ const preguntasVF = [
 // =========================================
 // COMPLETAR EL ESPACIO
 // =========================================
-const preguntasCompletar = [
+let preguntasCompletar = [
   { id:'cp1',  tema:'gases',        texto:'El Gas Grado 1 (Propano) tiene un poder calorífico de ___ Kcal/m³.',         ops:['9.300','13.000','22.380','27.482'], r:2, exp:'22.380 Kcal/m³ es el poder calorífico del Propano. El GN tiene ~9.300 Kcal/m³.' },
   { id:'cp2',  tema:'gases',        texto:'Para quemar 1 m³ de Propano se necesitan ___ m³ de aire.',                   ops:['9','17','24','30'],                r:2, exp:'24 m³ de aire por m³ de Propano. El Butano necesita 30 m³.' },
   { id:'cp3',  tema:'gases',        texto:'El Gas Grado 3 (Butano) pasa a estado líquido a ___.',                       ops:['-17°C','-44°C','0°C','-100°C'],   r:0, exp:'-17°C. El Propano se licúa a -44°C (temperatura más baja).' },
@@ -2648,31 +2668,26 @@ function volverModulos() { inicializarRefuerzo(); }
 // PANEL ADMINISTRADOR
 // =========================================
 let adminTabActual = 'mc';
-let preguntasExtra = []; // cargadas desde Supabase
 
 async function adminInicializar() {
-  await adminCargarPreguntasExtra();
+  if (_bancoDB.length === 0) await inicializarPreguntas();
   adminRenderizarStats();
   adminRenderizarLista();
   adminAdaptarFormulario();
 }
 
-async function adminCargarPreguntasExtra() {
-  if (!_sb) return;
-  try {
-    const { data } = await _sb.from('preguntas_extra').select('*').eq('activa', true);
-    preguntasExtra = data || [];
-  } catch(e) { console.warn('Error cargando preguntas extra:', e); }
-}
-
 function adminRenderizarStats() {
-  const custom = preguntasExtra.length;
+  const mc   = _bancoDB.filter(q => q.tipo === 'mc').length;
+  const vf   = _bancoDB.filter(q => q.tipo === 'vf').length;
+  const comp = _bancoDB.filter(q => q.tipo === 'completar').length;
+  const fl   = _bancoDB.filter(q => q.tipo === 'flash').length;
   document.getElementById('admin-stats-row').innerHTML = `
-    <div class="admin-stat-box"><div class="n">${preguntas.length}</div><div class="l">📝 Múltiple</div></div>
-    <div class="admin-stat-box"><div class="n">${preguntasVF.length}</div><div class="l">✅❌ V/F</div></div>
-    <div class="admin-stat-box"><div class="n">${preguntasCompletar.length}</div><div class="l">✏️ Completar</div></div>
-    <div class="admin-stat-box"><div class="n">${flashcards.length}</div><div class="l">🃏 Flash</div></div>
-    <div class="admin-stat-box"><div class="n" style="color:var(--naranja)">${custom}</div><div class="l">⭐ Personalizadas</div></div>`;
+    <div class="admin-stat-box"><div class="n">${mc}</div><div class="l">📝 Múltiple</div></div>
+    <div class="admin-stat-box"><div class="n">${vf}</div><div class="l">✅❌ V/F</div></div>
+    <div class="admin-stat-box"><div class="n">${comp}</div><div class="l">📋 Completar</div></div>
+    <div class="admin-stat-box"><div class="n">${fl}</div><div class="l">🃏 Flash</div></div>
+    <div class="admin-stat-box"><div class="n">${_bancoDB.length}</div><div class="l">📚 Total</div></div>
+  `;
 }
 
 function adminCambiarTab(tab, btn) {
@@ -2709,59 +2724,36 @@ function adminAdaptarFormulario() {
   }
 }
 
-function adminPoolActual() {
-  if (adminTabActual === 'vf')       return preguntasVF.map(q => ({...q, _fuente:'builtin'}));
-  if (adminTabActual === 'completar') return preguntasCompletar.map(q => ({...q, _fuente:'builtin'}));
-  if (adminTabActual === 'flash')    return flashcards.map(q => ({...q, _fuente:'builtin'}));
-  return preguntas.map(q => ({...q, _fuente:'builtin'}));
-}
-
 function adminRenderizarLista() {
   const tema   = document.getElementById('admin-filtro-tema').value;
   const buscar = (document.getElementById('admin-filtro-buscar').value || '').toLowerCase();
 
-  // Builtin + custom del tab actual
-  const customTab = preguntasExtra.filter(q => q.tipo === adminTabActual);
-  let pool = [
-    ...adminPoolActual(),
-    ...customTab.map(q => ({
-      id: q.id, tema: q.tema,
-      p: q.texto, texto: q.texto,
-      r: q.correcta, ops: q.opciones,
-      exp: q.explicacion, r_flash: q.respuesta,
-      _fuente: 'custom', _dbid: q.id
-    }))
-  ];
-
+  let pool = _bancoDB.filter(q => q.tipo === adminTabActual);
   if (tema)   pool = pool.filter(q => q.tema === tema);
-  if (buscar) pool = pool.filter(q => (q.p||q.texto||'').toLowerCase().includes(buscar));
+  if (buscar) pool = pool.filter(q => (q.texto||'').toLowerCase().includes(buscar));
 
-  const total = pool.length;
   const temaLabel = { gases:'🔥', nociones:'⚗️', reguladores:'⚙️', herramientas:'🔩', civil:'🏗️' };
 
-  document.getElementById('admin-lista').innerHTML = `
-    <p style="font-size:0.8rem;color:#888;margin-bottom:10px">${total} pregunta(s)</p>
+  document.getElementById('admin-lista').innerHTML = pool.length === 0
+    ? '<p style="color:#aaa;font-size:0.85rem">Sin resultados. ¿Ya cargaste las preguntas en Supabase?</p>'
+    : `<p style="font-size:0.8rem;color:#888;margin-bottom:10px">${pool.length} pregunta(s)</p>
     ${pool.map(q => {
-      const esCustom = q._fuente === 'custom';
-      const textoQ = q.p || q.texto || '';
       let respuestaLabel = '';
-      if (adminTabActual === 'vf')       respuestaLabel = q.r === true ? '✅ VERDADERO' : '❌ FALSO';
-      else if (adminTabActual === 'flash') respuestaLabel = (q.r || q.r_flash || '').toString().slice(0,80) + '...';
-      else if (q.ops)                     respuestaLabel = `✅ ${q.ops[q.r] || ''}`;
+      if (q.tipo === 'vf')        respuestaLabel = q.correcta ? '✅ VERDADERO' : '❌ FALSO';
+      else if (q.tipo === 'flash') respuestaLabel = (q.respuesta||'').slice(0,80) + '…';
+      else if (q.opciones)        respuestaLabel = `✅ ${q.opciones[q.correcta] || ''}`;
       return `
       <div class="admin-q-card">
         <div class="admin-q-header">
-          <span class="admin-q-id ${esCustom?'custom':''}">${q.id}</span>
-          <span class="admin-q-texto">${textoQ}
+          <span class="admin-q-id">${q.id}</span>
+          <span class="admin-q-texto">${q.texto}
             <span class="admin-tema-chip" style="background:var(--verde-claro);color:var(--verde)">${temaLabel[q.tema]||''} ${q.tema}</span>
           </span>
         </div>
         <div class="admin-q-respuesta">${respuestaLabel}</div>
         <div class="admin-q-actions">
-          ${esCustom ? `
-            <button class="btn-admin-sm editar" onclick="adminEditarPregunta('${q._dbid}')">✏️ Editar</button>
-            <button class="btn-admin-sm eliminar" onclick="adminEliminarPregunta('${q._dbid}')">🗑️ Eliminar</button>
-          ` : '<span style="font-size:0.72rem;color:#bbb">Pregunta incorporada</span>'}
+          <button class="btn-admin-sm editar" onclick="adminEditarPregunta('${q.id}')">✏️ Editar</button>
+          <button class="btn-admin-sm eliminar" onclick="adminEliminarPregunta('${q.id}')">🗑️ Eliminar</button>
         </div>
       </div>`;
     }).join('')}`;
@@ -2788,13 +2780,12 @@ async function adminGuardarPregunta() {
   const exp   = document.getElementById('nq-exp').value.trim();
   if (!texto) { msgEl.textContent = '⚠️ La pregunta no puede estar vacía.'; msgEl.style.color = 'var(--rojo)'; return; }
 
-  let correcta, opciones = null, respuesta = null;
+  let correcta = null, opciones = null, respuesta = null;
   if (adminTabActual === 'vf') {
     const val = document.getElementById('nq-correcta').value.trim().toLowerCase();
-    correcta = (val === 'true' || val === '1' || val === 'verdadero');
+    correcta = (val === 'true' || val === '1' || val === 'verdadero') ? 1 : 0;
   } else if (adminTabActual === 'flash') {
     respuesta = document.getElementById('nq-respuesta').value.trim();
-    correcta  = null;
     if (!respuesta) { msgEl.textContent = '⚠️ Completá la respuesta.'; msgEl.style.color='var(--rojo)'; return; }
   } else {
     correcta = parseInt(document.getElementById('nq-correcta').value) || 0;
@@ -2811,20 +2802,13 @@ async function adminGuardarPregunta() {
   const prefijo = { mc:'eq', vf:'ev', completar:'ec', flash:'ef' }[adminTabActual];
   const nuevoId = editId || `${prefijo}${Date.now()}`;
 
-  const row = {
-    id: nuevoId, tipo: adminTabActual, tema, texto,
-    opciones, correcta, respuesta, explicacion: exp, activa: true
-  };
+  const row = { id: nuevoId, tipo: adminTabActual, tema, texto, opciones, correcta, respuesta, explicacion: exp, activa: true };
 
   msgEl.textContent = 'Guardando...'; msgEl.style.color = '#888';
   try {
-    if (editId) {
-      await _sb.from('preguntas_extra').update(row).eq('id', editId);
-    } else {
-      await _sb.from('preguntas_extra').insert(row);
-    }
+    await _sb.from('preguntas_banco').upsert(row, { onConflict: 'id' });
     msgEl.textContent = '✅ Guardado correctamente.'; msgEl.style.color = 'var(--verde)';
-    await adminCargarPreguntasExtra();
+    await inicializarPreguntas();
     adminRenderizarStats();
     adminRenderizarLista();
     setTimeout(() => { document.getElementById('admin-form-nueva').style.display = 'none'; }, 1200);
@@ -2833,31 +2817,32 @@ async function adminGuardarPregunta() {
   }
 }
 
-function adminEditarPregunta(dbid) {
-  const q = preguntasExtra.find(p => p.id === dbid);
+function adminEditarPregunta(id) {
+  const q = _bancoDB.find(r => r.id === id);
   if (!q) return;
-  document.getElementById('admin-edit-id').value = dbid;
+  document.getElementById('admin-edit-id').value = id;
   document.getElementById('admin-form-titulo').textContent = '✏️ Editar pregunta';
-  document.getElementById('nq-tema').value    = q.tema;
-  document.getElementById('nq-texto').value   = q.texto;
-  document.getElementById('nq-exp').value     = q.explicacion || '';
+  document.getElementById('nq-tema').value     = q.tema;
+  document.getElementById('nq-texto').value    = q.texto;
+  document.getElementById('nq-exp').value      = q.explicacion || '';
   document.getElementById('nq-correcta').value = q.correcta !== null ? String(q.correcta) : '';
   document.getElementById('nq-respuesta').value = q.respuesta || '';
   if (q.opciones) {
-    ['nq-op0','nq-op1','nq-op2','nq-op3'].forEach((id,i) => {
-      document.getElementById(id).value = q.opciones[i] || '';
+    ['nq-op0','nq-op1','nq-op2','nq-op3'].forEach((elId,i) => {
+      document.getElementById(elId).value = q.opciones[i] || '';
     });
   }
+  adminAdaptarFormulario();
   document.getElementById('admin-form-msg').textContent = '';
   document.getElementById('admin-form-nueva').style.display = '';
   document.getElementById('nq-texto').focus();
 }
 
-async function adminEliminarPregunta(dbid) {
-  if (!confirm('¿Eliminar esta pregunta?')) return;
+async function adminEliminarPregunta(id) {
+  if (!confirm('¿Eliminar esta pregunta? Esta acción no se puede deshacer.')) return;
   try {
-    await _sb.from('preguntas_extra').update({ activa: false }).eq('id', dbid);
-    await adminCargarPreguntasExtra();
+    await _sb.from('preguntas_banco').delete().eq('id', id);
+    await inicializarPreguntas();
     adminRenderizarStats();
     adminRenderizarLista();
   } catch(e) { alert('Error al eliminar: ' + e.message); }
@@ -2870,6 +2855,8 @@ actualizarBadges();
 renderizarInicio();
 mostrarPantalla('inicio');
 initSupabase();
+// Cargar banco de preguntas desde Supabase (async, re-renderiza al terminar)
+inicializarPreguntas().then(() => { renderizarInicio(); });
 </script>
 </body>
 </html>
