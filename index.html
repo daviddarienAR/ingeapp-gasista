@@ -342,10 +342,11 @@
   .leccion-slide .ls-cuerpo { font-size: 0.9rem; line-height: 1.7; color: #2a3a2b; }
   .leccion-slide .ls-cuerpo strong { color: var(--verde-oscuro); }
   .ls-dato {
-    display: flex; align-items: flex-start; gap: 8px;
+    display: block;
     background: white; border-radius: 7px; padding: 8px 10px;
     margin-top: 8px; border-left: 3px solid var(--verde-accent);
     font-size: 0.86rem; color: #1b3a1c;
+    line-height: 1.65; overflow-wrap: break-word; word-break: break-word;
   }
   .ls-tip {
     background: #fff8e1; border-left: 3px solid var(--naranja);
@@ -577,6 +578,21 @@
 
     /* Selector quiz */
     .selector-tema-quiz button { padding: 7px 12px; font-size: 0.82rem; }
+
+    /* Lección slides — evitar overflow horizontal */
+    .leccion-slide { padding: 12px; }
+    .ls-dato { font-size: 0.82rem; padding: 7px 9px; }
+
+    /* Admin panel — columnas a una sola columna en móvil */
+    .admin-form-row.cols2,
+    .admin-form-row.cols4 { grid-template-columns: 1fr; }
+
+    /* Simulacro header */
+    .sim-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+
+    /* V/F botones */
+    .vf-botones { flex-direction: column; gap: 8px; }
+    .vf-botones button { width: 100%; }
   }
 </style>
 </head>
