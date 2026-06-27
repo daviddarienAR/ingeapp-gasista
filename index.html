@@ -578,6 +578,8 @@
 
     /* Selector quiz */
     .selector-tema-quiz button { padding: 7px 12px; font-size: 0.82rem; }
+    .btn-solo-errores { font-size: 0.88rem; padding: 12px 14px; }
+    .pddia-card { padding: 16px; }
 
     /* Lección slides — evitar overflow horizontal */
     .leccion-slide { padding: 12px; }
@@ -594,6 +596,118 @@
     .vf-botones { flex-direction: column; gap: 8px; }
     .vf-botones button { width: 100%; }
   }
+
+  /* ===== RACHA & TOGGLE DARK ===== */
+  .btn-toggle-dark {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+    color: white; cursor: pointer; border-radius: 20px; padding: 5px 11px;
+    font-size: 0.82rem; transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-toggle-dark:hover { background: rgba(255,255,255,0.25); }
+  .badge-racha { background: rgba(255,152,0,0.3) !important; border-color: rgba(255,152,0,0.5) !important; cursor: default !important; }
+
+  /* ===== MODO SOLO ERRORES ===== */
+  .btn-solo-errores {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 14px 18px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, #c62828, #e53935); color: white;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-bottom: 14px;
+    transition: all 0.2s; box-shadow: 0 2px 8px rgba(198,40,40,0.3);
+  }
+  .btn-solo-errores:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(198,40,40,0.45); }
+  .btn-solo-errores .cnt { background: rgba(255,255,255,0.25); border-radius: 20px; padding: 2px 10px; font-size: 0.8rem; }
+
+  /* ===== PREGUNTA DEL DÍA ===== */
+  .pddia-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    animation: fadeIn 0.2s ease;
+  }
+  .pddia-card {
+    background: white; border-radius: 18px; padding: 24px; max-width: 480px; width: 100%;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25); animation: slideUp 0.25s ease;
+  }
+  .pddia-badge { display:inline-block; background: var(--verde); color:white; font-size:0.72rem; font-weight:700; border-radius:20px; padding:3px 11px; margin-bottom:12px; letter-spacing:0.3px; }
+  .pddia-tema { font-size:0.78rem; color:#888; margin-bottom:6px; }
+  .pddia-pregunta { font-size:1rem; font-weight:600; color:#1b3a1c; margin-bottom:14px; line-height:1.55; }
+  .pddia-opciones { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+  .pddia-opciones .opcion { padding:10px 14px; font-size:0.9rem; }
+  .pddia-feedback { font-size:0.85rem; line-height:1.55; padding:10px 12px; border-radius:8px; margin-bottom:12px; display:none; }
+  .pddia-feedback.ok { background:#e8f5e9; color:#1b5e20; }
+  .pddia-feedback.mal { background:#ffebee; color:#b71c1c; }
+  .pddia-footer { display:flex; gap:8px; justify-content:flex-end; margin-top:4px; }
+  .pddia-btn { padding:9px 18px; border-radius:8px; border:none; cursor:pointer; font-size:0.88rem; font-weight:600; transition:all 0.15s; }
+  .pddia-btn.primario { background:var(--verde); color:white; }
+  .pddia-btn.primario:hover { background:var(--verde-medio); }
+  .pddia-btn.secundario { background:#f0f0f0; color:#555; }
+
+  /* ===== SIMULACRO — DESGLOSE POR TEMA ===== */
+  .sim-tema-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--borde); }
+  .sim-tema-row:last-child { border-bottom:none; }
+  .sim-tema-label { flex:1; font-size:0.83rem; font-weight:600; color:#333; }
+  .sim-tema-barra-wrap { width:90px; background:#eee; border-radius:4px; height:7px; flex-shrink:0; }
+  .sim-tema-barra { height:7px; border-radius:4px; }
+  .sim-tema-pct { font-size:0.82rem; width:36px; text-align:right; font-weight:700; }
+
+  /* ===== PDF EXPORT BUTTON ===== */
+  .btn-pdf { background:#1565c0; color:white; border:none; border-radius:8px; padding:9px 16px; font-size:0.85rem; font-weight:600; cursor:pointer; transition:all 0.15s; }
+  .btn-pdf:hover { background:#0d47a1; }
+
+  /* ===== MODO OSCURO ===== */
+  body.dark { background:#0d1a0d; color:#d4edda; }
+  body.dark main { background:#0d1a0d; }
+  body.dark .card, body.dark .pregunta-card, body.dark .resultado-card,
+  body.dark .calc-card, body.dark .resumen-card, body.dark .modulo-card,
+  body.dark .admin-add-form, body.dark .admin-q-card, body.dark .leccion-slide,
+  body.dark .tarjeta-frente, body.dark .tarjeta-dorso {
+    background:#1a2e1a; border-color:#2e4a2e; color:#d4edda;
+  }
+  body.dark .opcion { background:#152215; border-color:#2a3a2a; color:#c8e6c9; }
+  body.dark .opcion:hover { background:#1a3a1a; border-color:var(--verde); }
+  body.dark .opcion.correcta { background:#1b5e20; }
+  body.dark .opcion.incorrecta { background:#7f0000; }
+  body.dark .opcion.mostrar-correcta { background:#1b5e20; }
+  body.dark .acord { background:#1a2e1a; border-color:#2e4a2e; }
+  body.dark .acord-header { background:#1e3a1e; }
+  body.dark .fallada-item { background:#152215; border-color:#2a4a2a; color:#c8e6c9; }
+  body.dark .info-box, body.dark .ls-dato { background:#152215; color:#c8e6c9; border-left-color:#2e6a2e; }
+  body.dark .feedback-box.ok { background:#1b5e20; color:#c8e6c9; }
+  body.dark .feedback-box.mal { background:#7f0000; color:#ffcdd2; }
+  body.dark h2, body.dark h3, body.dark h4 { color:#c8e6c9; }
+  body.dark p { color:#a5c8a5; }
+  body.dark input, body.dark select, body.dark textarea { background:#152215; color:#c8e6c9; border-color:#2a4a2a; }
+  body.dark .btn-accion.secundario { background:#1e3a1e; color:#c8e6c9; border-color:#2a4a2a; }
+  body.dark .tema-card { background:#1a2e1a; border-color:#2e4a2e; }
+  body.dark .inicio-card { background:#1a2e1a; }
+  body.dark .sim-rev-item { background:#1a2e1a; border-color:#2e4a2e; }
+  body.dark .resultado-tabla th { background:#1e3a1e; color:#c8e6c9; }
+  body.dark .resultado-tabla td { border-color:#2a4a2a; color:#c8e6c9; }
+  body.dark .sim-tema-label { color:#c8e6c9; }
+  body.dark .sim-tema-barra-wrap { background:#2a3a2a; }
+  body.dark .pddia-card { background:#1a2e1a; color:#d4edda; }
+  body.dark .pddia-pregunta { color:#c8e6c9; }
+  body.dark .pddia-feedback.ok { background:#1b5e20; color:#c8e6c9; }
+  body.dark .pddia-feedback.mal { background:#7f0000; color:#ffcdd2; }
+  body.dark .btn-toggle-dark { background:rgba(255,255,255,0.2); }
+
+  /* ===== ANIMACIONES ===== */
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  @keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+
+  /* ===== PRINT / PDF ===== */
+  @media print {
+    header, nav, .fab, .btn-solo-errores, .btn-accion, .btn-pdf,
+    #pantalla-quiz, #pantalla-flash, #pantalla-simulacro, #pantalla-calc,
+    #pantalla-refuerzo, #pantalla-admin, .pddia-overlay { display:none !important; }
+    #pantalla-inicio { display:block !important; }
+    #pantalla-resumen { display:block !important; }
+    .screen { display:none !important; }
+    #pantalla-resumen.screen, #pantalla-inicio.screen { display:block !important; }
+    .acord-body { display:block !important; max-height:none !important; overflow:visible !important; }
+    .acord { break-inside:avoid; margin-bottom:10px; }
+    body { background:white; color:black; }
+    main { padding:0; }
+  }
 </style>
 </head>
 <body>
@@ -605,8 +719,10 @@
     <p>App de repaso · Curso Gasista</p>
   </div>
   <div class="header-badges">
+    <div class="badge-stat badge-racha" id="badge-racha">🔥 0 días</div>
     <div class="badge-stat" onclick="mostrarPantalla('resumen')" id="badge-aciertos">✅ 0 aciertos</div>
     <div class="badge-stat" onclick="mostrarPantalla('resumen')" id="badge-errores">❌ 0 errores</div>
+    <button class="btn-toggle-dark" onclick="toggleDarkMode()" id="btn-dark" title="Modo oscuro">🌙</button>
     <button class="btn-auth" id="btn-login" onclick="abrirModalAuth()">👤 Ingresar</button>
     <button class="btn-auth" id="btn-admin" onclick="mostrarPantalla('admin')" style="display:none;background:rgba(245,124,0,0.3);border-color:rgba(245,124,0,0.6)">🔧 Admin</button>
     <button class="btn-auth logout" id="btn-logout" onclick="cerrarSesion()" style="display:none">Salir 👋</button>
@@ -653,6 +769,11 @@
   <div class="card" style="border-left: 4px solid var(--verde)">
     <h2>¡Bienvenida a IngeAPP! 🌳</h2>
     <p style="color:#444;line-height:1.6">Repasá cada tema del curso de Gasista. IngeAPP registra tus errores y genera un plan de refuerzo personalizado para que llegues segura a cada evaluación.</p>
+  </div>
+  <div id="btn-solo-errores-wrap" style="display:none">
+    <button class="btn-solo-errores" onclick="iniciarModoErrores()">
+      ⚡ Repasar solo mis errores <span class="cnt" id="cnt-errores-total">0</span>
+    </button>
   </div>
   <div class="inicio-grid" id="inicio-grid"></div>
   <div class="card" style="margin-top:14px">
@@ -861,9 +982,10 @@
     <h2>📊 Mi resumen de progreso</h2>
     <div id="estadisticas-globales" class="estadisticas-globales"></div>
     <div id="resumen-contenido"></div>
-    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <button class="btn-accion primario" onclick="mostrarPantalla('refuerzo')">🎯 Ir a Módulos de Refuerzo</button>
-      <button class="btn-accion secundario" onclick="resetearProgreso()">🗑️ Reiniciar progreso</button>
+      <button class="btn-pdf" onclick="exportarPDF()">🖨️ Exportar PDF</button>
+      <button class="btn-accion secundario" onclick="resetearProgreso()" style="margin-left:auto">🗑️ Reiniciar</button>
     </div>
   </div>
 </div>
@@ -984,6 +1106,10 @@
       <div class="sim-resultado-grid">
         <div class="sim-stat"><div class="num" id="sim-res-ok">0</div><div class="lbl">✅ Correctas</div></div>
         <div class="sim-stat mal"><div class="num" id="sim-res-err">0</div><div class="lbl">❌ Incorrectas</div></div>
+      </div>
+      <div id="sim-desglose-tema" style="margin:14px 0;display:none">
+        <h4 style="font-size:0.85rem;color:#555;margin-bottom:10px">📊 Resultado por tema:</h4>
+        <div id="sim-desglose-contenido"></div>
       </div>
       <div class="sim-revision" id="sim-revision"></div>
       <div class="resultado-btns" style="margin-top:16px">
@@ -1573,8 +1699,9 @@ function iniciarQuizTema(tema) {
 }
 
 function iniciarQuiz(tema) {
-  let pool = tema === 'todos' ? [...preguntas] : preguntas.filter(q => q.tema === tema);
-  pool = mezclar(pool).slice(0, Math.min(pool.length, 12));
+  const base = tema === 'todos' ? [...preguntas] : preguntas.filter(q => q.tema === tema);
+  const prog = cargarProgreso();
+  let pool = crearPoolPesado(base, prog, Math.min(base.length, 12));
   quizEstado = { pool, indice: 0, aciertos: 0, tema, sesionFallos: [] };
 
   document.getElementById('quiz-selector').style.display = 'none';
@@ -1936,6 +2063,25 @@ function mostrarResultadoSim() {
     const texto = tipo + (q.p || q.texto || '');
     registrarRespuesta(q.id, q.tema, correcta, '[Simulacro] ' + texto);
   });
+
+  // Desglose por tema
+  const desglose = {};
+  respuestas.forEach(({ q, correcta }) => {
+    if (!desglose[q.tema]) desglose[q.tema] = { ok: 0, total: 0 };
+    desglose[q.tema].total++;
+    if (correcta) desglose[q.tema].ok++;
+  });
+  const desgloseEl = document.getElementById('sim-desglose-tema');
+  if (desgloseEl) {
+    desgloseEl.innerHTML = Object.entries(desglose).map(([t, v]) => {
+      const pctT = Math.round((v.ok / v.total) * 100);
+      const col = pctT >= 70 ? 'var(--verde)' : pctT >= 40 ? 'var(--naranja,#f90)' : 'var(--rojo)';
+      return `<div class="sim-tema-row">
+        <span>${temasInfo[t]?.icon||''} ${temaNombres[t]||t}</span>
+        <span style="color:${col};font-weight:700">${v.ok}/${v.total} (${pctT}%)</span>
+      </div>`;
+    }).join('');
+  }
 
   // Mostrar revisión detallada
   const rev = document.getElementById('sim-revision');
@@ -2900,14 +3046,207 @@ async function adminEliminarPregunta(id) {
 }
 
 // =========================================
+// RACHA DIARIA 🔥
+// =========================================
+function gestionarRacha() {
+  const hoy = new Date().toDateString();
+  let data = { fecha: '', racha: 0 };
+  try { data = JSON.parse(localStorage.getItem('ingeapp_racha') || '{}'); } catch {}
+  const ayer = new Date(Date.now() - 86400000).toDateString();
+  let racha = data.fecha === hoy ? (data.racha || 1) : data.fecha === ayer ? (data.racha || 0) + 1 : 1;
+  try { localStorage.setItem('ingeapp_racha', JSON.stringify({ fecha: hoy, racha })); } catch {}
+  const el = document.getElementById('badge-racha');
+  if (el) el.textContent = `🔥 ${racha} día${racha !== 1 ? 's' : ''}`;
+}
+
+// =========================================
+// PREGUNTA DEL DÍA ⭐
+// =========================================
+function mostrarPreguntaDelDia() {
+  const hoy = new Date().toDateString();
+  try { if (localStorage.getItem('ingeapp_pddia') === hoy) return; } catch {}
+  const prog = cargarProgreso();
+  if (Object.keys(prog).length < 3) return;
+
+  // Tema más débil por ratio error/intentos
+  const por = {};
+  Object.values(prog).forEach(v => {
+    if (!por[v.tema]) por[v.tema] = { err: 0, int: 0 };
+    por[v.tema].err += v.errores; por[v.tema].int += v.intentos;
+  });
+  const temaMasDificil = Object.entries(por)
+    .filter(([, v]) => v.int > 0)
+    .sort(([, a], [, b]) => (b.err / b.int) - (a.err / a.int))[0]?.[0];
+  if (!temaMasDificil) return;
+
+  // Preferir preguntas con errores del tema más débil
+  const candidatas = [
+    ...preguntas.filter(q => q.tema === temaMasDificil).map(q => ({...q, _tipo:'mc'})),
+    ...preguntasVF.filter(q => q.tema === temaMasDificil).map(q => ({...q, _tipo:'vf'})),
+  ];
+  if (!candidatas.length) return;
+  const errored = candidatas.filter(q => prog[q.id]?.errores > 0);
+  const pool = errored.length ? errored : candidatas;
+  const q = pool[Math.floor(Math.random() * pool.length)];
+
+  try { localStorage.setItem('ingeapp_pddia', hoy); } catch {}
+
+  document.getElementById('pddia-tema').textContent =
+    `${temasInfo[temaMasDificil]?.icon || ''} ${temaNombres[temaMasDificil] || temaMasDificil} · Tema más difícil`;
+  document.getElementById('pddia-pregunta').textContent = q.p;
+
+  const cont = document.getElementById('pddia-opciones');
+  if (q._tipo === 'vf') {
+    cont.innerHTML = `
+      <button class="opcion" onclick="responderPddia(1,this)">✅ Verdadero</button>
+      <button class="opcion" onclick="responderPddia(0,this)">❌ Falso</button>`;
+  } else {
+    cont.innerHTML = mezclar((q.ops||[]).map((o,i) => ({o,i})))
+      .map(({o,i}) => `<button class="opcion" onclick="responderPddia(${i},this)">${o}</button>`).join('');
+  }
+  window._pddiaQ = q;
+  document.getElementById('pddia-overlay').style.display = 'flex';
+}
+
+function responderPddia(idx, btn) {
+  const q = window._pddiaQ;
+  document.querySelectorAll('#pddia-opciones .opcion').forEach(b => b.disabled = true);
+  const correcta = q._tipo === 'vf' ? ((idx === 1) === q.r) : (idx === q.r);
+  btn.classList.add(correcta ? 'correcta' : 'incorrecta');
+  if (!correcta && q._tipo !== 'vf') {
+    document.querySelectorAll('#pddia-opciones .opcion').forEach((b, i) => {
+      if (i > 0) return; // skip; handled via data would be cleaner but inline onclick doesn't carry index easily
+    });
+    // mark correct option green
+    document.querySelectorAll('#pddia-opciones .opcion').forEach(b => {
+      const m = b.getAttribute('onclick').match(/responderPddia\((\d+)/);
+      if (m && parseInt(m[1]) === q.r) b.classList.add('mostrar-correcta');
+    });
+  }
+  const fb = document.getElementById('pddia-feedback');
+  fb.className = 'pddia-feedback ' + (correcta ? 'ok' : 'mal');
+  fb.innerHTML = (correcta ? '✅ <strong>¡Correcto!</strong> ' : '❌ <strong>Incorrecto.</strong> ') + (q.exp || '');
+  fb.style.display = 'block';
+  registrarRespuesta(q.id, q.tema, correcta, '⭐ ' + q.p);
+  actualizarBadges();
+  if (!correcta) {
+    const btnAcc = document.getElementById('pddia-btn-accion');
+    btnAcc.style.display = '';
+    btnAcc.onclick = () => { cerrarPreguntaDia(); abrirModuloTema(q.tema); };
+  }
+}
+
+function cerrarPreguntaDia() { document.getElementById('pddia-overlay').style.display = 'none'; }
+
+// =========================================
+// MODO SOLO ERRORES ⚡
+// =========================================
+function iniciarModoErrores() {
+  const prog = cargarProgreso();
+  const err = q => prog[q.id]?.errores > 0;
+  const tag = t => q => ({...q, _tipo: t});
+  const falladas = mezclar([
+    ...preguntas.filter(err).map(tag('mc')),
+    ...preguntasVF.filter(err).map(tag('vf')),
+    ...preguntasCompletar.filter(err).map(tag('completar')),
+    ...flashcards.filter(err).map(tag('flash')),
+  ]);
+  if (!falladas.length) { alert('¡No tenés errores registrados! Completá más actividades primero. 🌟'); return; }
+  moduloActivo = { tema: 'todos', leccionIdx: 0, practicaPool: falladas, practicaIdx: 0, practicaAciertos: 0 };
+  mostrarPantalla('refuerzo');
+  ['refuerzo-sin-datos','refuerzo-modulos-lista','refuerzo-leccion','refuerzo-resultado']
+    .forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('refuerzo-practica').style.display = '';
+  document.getElementById('practica-titulo').innerHTML = '⚡ Repaso de Errores';
+  document.getElementById('practica-badge').textContent = `⚡ ${falladas.length} preguntas con errores`;
+  document.getElementById('practica-steps').innerHTML = '';
+  mostrarPreguntaPractica();
+}
+
+function actualizarBotonesExtra() {
+  const prog = cargarProgreso();
+  const total = [...preguntas,...preguntasVF,...preguntasCompletar,...flashcards]
+    .filter(q => prog[q.id]?.errores > 0).length;
+  const wrap = document.getElementById('btn-solo-errores-wrap');
+  if (wrap) wrap.style.display = total > 0 ? '' : 'none';
+  const cnt = document.getElementById('cnt-errores-total');
+  if (cnt) cnt.textContent = total;
+}
+
+// =========================================
+// REPETICIÓN ESPACIADA
+// =========================================
+function crearPoolPesado(base, prog, limite) {
+  const pesado = [];
+  base.forEach(q => {
+    const peso = Math.min(1 + (prog[q.id]?.errores || 0), 3);
+    for (let i = 0; i < peso; i++) pesado.push(q);
+  });
+  return mezclar(pesado).slice(0, limite);
+}
+
+// =========================================
+// DARK MODE 🌙
+// =========================================
+function toggleDarkMode() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('btn-dark').textContent = dark ? '☀️' : '🌙';
+  try { localStorage.setItem('ingeapp_dark', dark ? '1' : '0'); } catch {}
+}
+function cargarDarkMode() {
+  let pref = '0';
+  try { pref = localStorage.getItem('ingeapp_dark') || '0'; } catch {}
+  if (pref === '1') { document.body.classList.add('dark'); document.getElementById('btn-dark').textContent = '☀️'; }
+}
+
+// =========================================
+// EXPORTAR PDF 🖨️
+// =========================================
+function exportarPDF() {
+  mostrarPantalla('resumen');
+  document.querySelectorAll('.acord-body').forEach(el => {
+    el.style.maxHeight = '9999px'; el.style.display = 'block';
+  });
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => {
+      document.querySelectorAll('.acord-body').forEach(el => {
+        el.style.maxHeight = ''; el.style.display = '';
+      });
+    }, 500);
+  }, 200);
+}
+
+// =========================================
 // INIT
 // =========================================
+cargarDarkMode();
+gestionarRacha();
 actualizarBadges();
 renderizarInicio();
 mostrarPantalla('inicio');
 initSupabase();
 // Cargar banco de preguntas desde Supabase (async, re-renderiza al terminar)
-inicializarPreguntas().then(() => { renderizarInicio(); });
+inicializarPreguntas().then(() => {
+  renderizarInicio();
+  actualizarBotonesExtra();
+  setTimeout(mostrarPreguntaDelDia, 1200);
+});
 </script>
+
+<!-- MODAL PREGUNTA DEL DÍA -->
+<div id="pddia-overlay" class="pddia-overlay" style="display:none" onclick="if(event.target===this)cerrarPreguntaDia()">
+  <div class="pddia-card">
+    <div class="pddia-badge">⭐ Pregunta del día</div>
+    <div class="pddia-tema" id="pddia-tema"></div>
+    <div class="pddia-pregunta" id="pddia-pregunta"></div>
+    <div class="pddia-opciones" id="pddia-opciones"></div>
+    <div class="pddia-feedback" id="pddia-feedback"></div>
+    <div class="pddia-footer">
+      <button class="pddia-btn secundario" onclick="cerrarPreguntaDia()">Cerrar</button>
+      <button class="pddia-btn primario" id="pddia-btn-accion" onclick="cerrarPreguntaDia()" style="display:none">Ir al Refuerzo →</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
