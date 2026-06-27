@@ -373,6 +373,46 @@
   }
   .fab:hover { background: var(--verde-oscuro); transform: translateY(-2px); }
 
+  /* AUTH */
+  .btn-auth {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white; border-radius: 20px;
+    padding: 5px 14px; font-size: 0.82rem;
+    cursor: pointer; transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .btn-auth:hover { background: rgba(255,255,255,0.28); }
+  .btn-auth.logout { background: rgba(198,40,40,0.3); border-color: rgba(198,40,40,0.5); }
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal-card {
+    background: white; border-radius: 16px; padding: 30px 28px;
+    width: 100%; max-width: 380px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    position: relative; margin: 16px;
+  }
+  .modal-card h2 { color: var(--verde); margin-bottom: 6px; font-size: 1.2rem; }
+  .modal-card p { color: #666; font-size: 0.85rem; margin-bottom: 20px; }
+  .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #aaa; }
+  .modal-close:hover { color: #555; }
+  .auth-tabs { display: flex; margin-bottom: 22px; border-bottom: 2px solid var(--borde); }
+  .auth-tab { padding: 8px 20px; border: none; background: none; cursor: pointer; font-size: 0.9rem; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .auth-tab.active { color: var(--verde); border-bottom-color: var(--verde); font-weight: 600; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 0.82rem; color: #555; margin-bottom: 5px; font-weight: 600; }
+  .form-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--borde); border-radius: 8px; font-size: 0.92rem; transition: border-color 0.2s; }
+  .form-group input:focus { outline: none; border-color: var(--verde); }
+  .btn-auth-submit { width: 100%; padding: 12px; background: var(--verde); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 6px; transition: background 0.2s; }
+  .btn-auth-submit:hover { background: var(--verde-oscuro); }
+  .btn-auth-submit:disabled { background: #aaa; cursor: not-allowed; }
+  .auth-msg { font-size: 0.82rem; margin-top: 10px; padding: 8px 12px; border-radius: 6px; display: none; }
+  .auth-msg.error { background: var(--rojo-suave); color: #7a1a1a; display: block; }
+  .auth-msg.ok { background: var(--verde-claro); color: #1a4f22; display: block; }
+
   @media (max-width: 600px) {
     /* Header */
     .header-tree { font-size: 2rem; }
@@ -444,8 +484,33 @@
   <div class="header-badges">
     <div class="badge-stat" onclick="mostrarPantalla('resumen')" id="badge-aciertos">✅ 0 aciertos</div>
     <div class="badge-stat" onclick="mostrarPantalla('resumen')" id="badge-errores">❌ 0 errores</div>
+    <button class="btn-auth" id="btn-login" onclick="abrirModalAuth()">👤 Ingresar</button>
+    <button class="btn-auth logout" id="btn-logout" onclick="cerrarSesion()" style="display:none">Salir 👋</button>
   </div>
 </header>
+
+<!-- MODAL LOGIN / REGISTRO -->
+<div class="modal-overlay" id="modal-auth" onclick="if(event.target===this)cerrarModalAuth()">
+  <div class="modal-card">
+    <button class="modal-close" onclick="cerrarModalAuth()">✕</button>
+    <h2>🌳 IngeAPP</h2>
+    <p>Guardá tu progreso en la nube y accedé desde cualquier dispositivo.</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Iniciar sesión</button>
+      <button class="auth-tab" id="tab-registro" onclick="switchTab('registro')">Registrarse</button>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="tu@email.com" onkeydown="if(event.key==='Enter')submitAuth()">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="auth-pass" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter')submitAuth()">
+    </div>
+    <button class="btn-auth-submit" id="btn-submit-auth" onclick="submitAuth()">Iniciar sesión</button>
+    <div class="auth-msg" id="auth-msg"></div>
+  </div>
+</div>
 
 <nav>
   <button class="active" onclick="mostrarPantalla('inicio')">🌿 Inicio</button>
@@ -741,7 +806,147 @@
   <span onclick="document.getElementById('fab-resumen').style.display='none'" style="cursor:pointer;opacity:0.7;font-size:1.1rem;padding-left:8px;border-left:1px solid rgba(255,255,255,0.4);margin-left:4px" title="Cerrar">✕</span>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// =========================================
+// SUPABASE — AUTH Y SINCRONIZACIÓN
+// =========================================
+const SUPABASE_URL = 'https://egtofaehwnhvyxecfqeu.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_XZhQej7SCpZZQAjN2huBWQ_WxNDWnh2';
+let _sb = null;
+let _usuario = null;
+let _authTab = 'login';
+
+function initSupabase() {
+  try {
+    _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    _sb.auth.onAuthStateChange((event, session) => {
+      _usuario = session?.user || null;
+      actualizarUIAuth();
+      if (_usuario && event === 'SIGNED_IN') sincronizarDesdeSupabase();
+    });
+    _sb.auth.getSession().then(({ data }) => {
+      _usuario = data.session?.user || null;
+      actualizarUIAuth();
+      if (_usuario) sincronizarDesdeSupabase();
+    });
+  } catch(e) { console.warn('Supabase init error:', e); }
+}
+
+function actualizarUIAuth() {
+  const btnLogin  = document.getElementById('btn-login');
+  const btnLogout = document.getElementById('btn-logout');
+  if (_usuario) {
+    const nombre = _usuario.email.split('@')[0];
+    btnLogin.style.display  = 'none';
+    btnLogout.style.display = '';
+    btnLogout.textContent   = `${nombre} · Salir`;
+  } else {
+    btnLogin.style.display  = '';
+    btnLogout.style.display = 'none';
+  }
+}
+
+function abrirModalAuth() {
+  document.getElementById('modal-auth').classList.add('visible');
+  document.getElementById('auth-msg').className = 'auth-msg';
+  document.getElementById('auth-email').focus();
+}
+function cerrarModalAuth() {
+  document.getElementById('modal-auth').classList.remove('visible');
+}
+function switchTab(tab) {
+  _authTab = tab;
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-registro').classList.toggle('active', tab === 'registro');
+  document.getElementById('btn-submit-auth').textContent = tab === 'login' ? 'Iniciar sesión' : 'Registrarse';
+  document.getElementById('auth-msg').className = 'auth-msg';
+}
+
+async function submitAuth() {
+  if (!_sb) { mostrarMsgAuth('Sin conexión a Supabase', 'error'); return; }
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const btn   = document.getElementById('btn-submit-auth');
+  if (!email || !pass) { mostrarMsgAuth('Completá email y contraseña', 'error'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Cargando...';
+
+  let result;
+  if (_authTab === 'login') {
+    result = await _sb.auth.signInWithPassword({ email, password: pass });
+  } else {
+    result = await _sb.auth.signUp({ email, password: pass });
+  }
+
+  btn.disabled = false;
+  btn.textContent = _authTab === 'login' ? 'Iniciar sesión' : 'Registrarse';
+
+  if (result.error) {
+    const msg = result.error.message.includes('Invalid login') ? 'Email o contraseña incorrectos.' :
+                result.error.message.includes('already registered') ? 'Este email ya está registrado.' :
+                result.error.message;
+    mostrarMsgAuth(msg, 'error');
+  } else if (_authTab === 'registro' && !result.data.session) {
+    mostrarMsgAuth('✅ Revisá tu email para confirmar la cuenta.', 'ok');
+  } else {
+    cerrarModalAuth();
+  }
+}
+
+function mostrarMsgAuth(texto, tipo) {
+  const el = document.getElementById('auth-msg');
+  el.textContent = texto;
+  el.className = 'auth-msg ' + tipo;
+}
+
+async function cerrarSesion() {
+  if (_sb) await _sb.auth.signOut();
+  _usuario = null;
+  actualizarUIAuth();
+}
+
+async function sincronizarDesdeSupabase() {
+  if (!_sb || !_usuario) return;
+  try {
+    const { data } = await _sb.from('progreso').select('*').eq('user_id', _usuario.id);
+    if (!data?.length) { subirProgresoLocal(); return; }
+    const prog = cargarProgreso();
+    data.forEach(row => {
+      const local = prog[row.pregunta_id];
+      if (!local) {
+        prog[row.pregunta_id] = { tema: row.tema, texto: row.texto, intentos: row.intentos, errores: row.errores };
+      } else {
+        prog[row.pregunta_id].intentos = Math.max(local.intentos, row.intentos);
+        prog[row.pregunta_id].errores  = Math.max(local.errores,  row.errores);
+      }
+    });
+    guardarProgreso(prog);
+    actualizarBadges();
+    renderizarInicio();
+  } catch(e) { console.warn('Error sincronizando:', e); }
+}
+
+async function subirProgresoLocal() {
+  const prog = cargarProgreso();
+  if (!Object.keys(prog).length) return;
+  await guardarEnSupabase(prog);
+}
+
+async function guardarEnSupabase(prog) {
+  if (!_sb || !_usuario) return;
+  try {
+    const rows = Object.entries(prog).map(([id, v]) => ({
+      user_id: _usuario.id, pregunta_id: id,
+      tema: v.tema, texto: v.texto || '',
+      intentos: v.intentos, errores: v.errores,
+      updated_at: new Date().toISOString()
+    }));
+    await _sb.from('progreso').upsert(rows, { onConflict: 'user_id,pregunta_id' });
+  } catch(e) { console.warn('Error guardando en Supabase:', e); }
+}
+
 // =========================================
 // BANCO DE PREGUNTAS (con tema y id únicos)
 // =========================================
@@ -868,6 +1073,7 @@ function guardarProgreso(p) {
   if (_storageDisponible) {
     try { localStorage.setItem('ingeapp_progreso', JSON.stringify(p)); } catch(e) {}
   }
+  guardarEnSupabase(p); // sync en la nube si hay sesión activa
 }
 function registrarRespuesta(idPregunta, temaPregunta, correcta, textoPregunta) {
   try {
@@ -1795,6 +2001,7 @@ function volverModulos() { inicializarRefuerzo(); }
 actualizarBadges();
 renderizarInicio();
 mostrarPantalla('inicio');
+initSupabase();
 </script>
 </body>
 </html>
