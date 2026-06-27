@@ -413,6 +413,72 @@
   .auth-msg.error { background: var(--rojo-suave); color: #7a1a1a; display: block; }
   .auth-msg.ok { background: var(--verde-claro); color: #1a4f22; display: block; }
 
+  /* TIPO DE EJERCICIO SELECTOR */
+  .tipo-ejercicio-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin:14px 0; }
+  .tipo-card {
+    border:2px solid var(--borde); border-radius:10px; padding:14px 10px;
+    text-align:center; cursor:pointer; background:white; transition:all 0.2s;
+  }
+  .tipo-card:hover { border-color:var(--verde); background:var(--verde-claro); }
+  .tipo-card.sel { border-color:var(--verde); background:var(--verde-claro); }
+  .tipo-card .tipo-icon { font-size:1.8rem; margin-bottom:6px; }
+  .tipo-card .tipo-nombre { font-size:0.82rem; font-weight:600; color:var(--texto); }
+  .tipo-card .tipo-qty { font-size:0.72rem; color:#888; margin-top:3px; }
+
+  /* VERDADERO / FALSO */
+  .vf-botones { display:flex; gap:12px; margin-top:14px; }
+  .btn-verdadero, .btn-falso {
+    flex:1; padding:16px; border:none; border-radius:12px;
+    font-size:1.05rem; font-weight:700; cursor:pointer; transition:all 0.15s;
+  }
+  .btn-verdadero { background:#e8f5e9; color:#1a4f22; border:2px solid var(--verde-suave); }
+  .btn-verdadero:hover:not(:disabled) { background:var(--verde); color:white; }
+  .btn-verdadero.correcta, .btn-falso.correcta { background:var(--verde)!important; color:white!important; border-color:var(--verde)!important; }
+  .btn-verdadero.incorrecta, .btn-falso.incorrecta { background:var(--rojo)!important; color:white!important; border-color:var(--rojo)!important; }
+  .btn-falso { background:#ffebee; color:#7a1a1a; border:2px solid #ffcdd2; }
+  .btn-falso:hover:not(:disabled) { background:var(--rojo); color:white; }
+  .btn-verdadero:disabled, .btn-falso:disabled { cursor:default; opacity:0.85; }
+
+  /* COMPLETAR */
+  .completar-enunciado {
+    font-size:1.05rem; line-height:1.8; margin-bottom:20px; color:var(--texto);
+    background:var(--verde-claro); border-radius:10px; padding:16px 18px;
+    border-left:4px solid var(--verde);
+  }
+  .completar-blank {
+    display:inline-block; border-bottom:3px solid var(--verde);
+    min-width:120px; text-align:center; font-weight:700; color:var(--verde);
+    padding:0 8px; font-size:1.1rem;
+  }
+  .completar-resultado { font-size:1.1rem; font-weight:700; color:var(--verde); background:white; border-radius:6px; padding:2px 10px; }
+
+  /* SIMULACRO */
+  .sim-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+  .sim-timer {
+    background:var(--verde-oscuro); color:white; border-radius:10px;
+    padding:8px 16px; font-size:1.1rem; font-weight:700; font-family:monospace;
+    min-width:80px; text-align:center;
+  }
+  .sim-timer.urgente { background:var(--rojo); animation:parpadeo 1s infinite; }
+  @keyframes parpadeo { 0%,100%{opacity:1} 50%{opacity:0.6} }
+  .sim-tipo-badge {
+    font-size:0.72rem; background:var(--verde-suave); color:var(--verde-oscuro);
+    border-radius:6px; padding:2px 8px; font-weight:600; margin-bottom:8px; display:inline-block;
+  }
+  .sim-resultado-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0; }
+  .sim-stat { background:var(--verde-claro); border-radius:10px; padding:16px; text-align:center; border:1px solid var(--verde-suave); }
+  .sim-stat .num { font-size:2.2rem; font-weight:700; color:var(--verde); }
+  .sim-stat.mal .num { color:var(--rojo); }
+  .sim-stat .lbl { font-size:0.8rem; color:#555; margin-top:4px; }
+  .sim-revision { margin-top:16px; }
+  .sim-rev-item {
+    padding:10px 12px; border-radius:8px; margin-bottom:8px; font-size:0.84rem;
+    border-left:4px solid var(--borde);
+  }
+  .sim-rev-item.ok { background:var(--verde-claro); border-left-color:var(--verde); }
+  .sim-rev-item.mal { background:var(--rojo-suave); border-left-color:var(--rojo); }
+  .sim-rev-item .sim-tipo-mini { font-size:0.7rem; opacity:0.7; }
+
   @media (max-width: 600px) {
     /* Header */
     .header-tree { font-size: 2rem; }
@@ -516,6 +582,7 @@
   <button class="active" onclick="mostrarPantalla('inicio')">🌿 Inicio</button>
   <button onclick="mostrarPantalla('quiz')">📝 Quiz</button>
   <button onclick="mostrarPantalla('flash')">🃏 Flashcards</button>
+  <button onclick="mostrarPantalla('simulacro')">🏆 Simulacro</button>
   <button onclick="mostrarPantalla('calc')">🧮 Calculadora</button>
   <button onclick="mostrarPantalla('resumen')">📊 Resumen</button>
   <button onclick="mostrarPantalla('refuerzo')">🎯 Refuerzo</button>
@@ -543,9 +610,27 @@
 <!-- QUIZ -->
 <div id="pantalla-quiz" class="screen">
   <div id="quiz-selector" class="card">
-    <h2>Seleccioná el tema</h2>
+    <h2>Seleccioná el tipo de ejercicio</h2>
+    <div class="tipo-ejercicio-grid" id="tipos-ejercicio-grid">
+      <div class="tipo-card sel" onclick="selTipoEjercicio('mc',this)">
+        <div class="tipo-icon">📝</div>
+        <div class="tipo-nombre">Opción múltiple</div>
+        <div class="tipo-qty">48 preguntas</div>
+      </div>
+      <div class="tipo-card" onclick="selTipoEjercicio('vf',this)">
+        <div class="tipo-icon">✅❌</div>
+        <div class="tipo-nombre">Verdadero / Falso</div>
+        <div class="tipo-qty">20 preguntas</div>
+      </div>
+      <div class="tipo-card" onclick="selTipoEjercicio('completar',this)">
+        <div class="tipo-icon">✏️</div>
+        <div class="tipo-nombre">Completar</div>
+        <div class="tipo-qty">15 preguntas</div>
+      </div>
+    </div>
+    <h2 style="margin-top:16px">Seleccioná el tema</h2>
     <div class="selector-tema-quiz" id="botones-tema-quiz"></div>
-    <button class="btn-calc" onclick="iniciarQuizSeleccionado()" style="margin-top:6px">Comenzar ▶</button>
+    <button class="btn-calc" onclick="iniciarQuizSeleccionado()" style="margin-top:10px">Comenzar ▶</button>
   </div>
   <div id="quiz-activo" style="display:none">
     <div class="quiz-header">
@@ -797,6 +882,61 @@
 
 </div>
 
+<!-- SIMULACRO -->
+<div id="pantalla-simulacro" class="screen">
+  <!-- Pantalla de inicio del simulacro -->
+  <div id="sim-intro" class="card">
+    <h2>🏆 Simulacro de Evaluación</h2>
+    <p style="color:#555;margin-bottom:16px;line-height:1.6">Condiciones reales de evaluación: <strong>20 preguntas</strong> de todos los temas mezcladas, <strong>30 minutos</strong> de tiempo. No verás si acertaste hasta el final.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
+      <div class="sim-stat"><div class="num">20</div><div class="lbl">Preguntas</div></div>
+      <div class="sim-stat"><div class="num">30'</div><div class="lbl">Minutos</div></div>
+      <div class="sim-stat"><div class="num">70%</div><div class="lbl">Para aprobar</div></div>
+    </div>
+    <div style="background:#fff8e1;border-left:4px solid var(--naranja);border-radius:8px;padding:12px 14px;font-size:0.85rem;color:#4a3000;margin-bottom:18px">
+      💡 <strong>Tip:</strong> Incluye preguntas de Opción Múltiple, Verdadero/Falso y Completar. El resultado se guarda en tu resumen.
+    </div>
+    <button class="btn-calc" onclick="iniciarSimulacro()" style="width:100%;padding:14px;font-size:1rem">🚀 Empezar simulacro</button>
+  </div>
+
+  <!-- Simulacro activo -->
+  <div id="sim-activo" style="display:none">
+    <div class="sim-header">
+      <span class="quiz-tema-badge" id="sim-badge">🏆 Simulacro</span>
+      <span class="quiz-progreso" id="sim-progreso"></span>
+      <div class="sim-timer" id="sim-timer">30:00</div>
+    </div>
+    <div class="barra-progreso"><div class="barra-fill" id="sim-barra-fill"></div></div>
+    <div class="pregunta-card">
+      <div id="sim-tipo-badge" class="sim-tipo-badge"></div>
+      <h2 id="sim-pregunta-texto"></h2>
+      <div id="sim-opciones-container"></div>
+    </div>
+    <button class="btn-siguiente" id="sim-btn-sig" onclick="simSiguiente()" disabled style="margin-top:10px">Respondé para continuar →</button>
+    <button onclick="confirmarAbandonarSim()" style="width:100%;margin-top:8px;padding:10px;background:none;border:1px solid var(--borde);border-radius:8px;cursor:pointer;color:#888;font-size:0.85rem">Abandonar simulacro</button>
+  </div>
+
+  <!-- Resultado del simulacro -->
+  <div id="sim-resultado" style="display:none">
+    <div class="resultado-card">
+      <div style="font-size:2.8rem" id="sim-res-emoji">🏆</div>
+      <div class="resultado-numero" id="sim-res-puntaje"></div>
+      <p style="font-weight:600;font-size:1rem;margin-bottom:4px" id="sim-res-estado"></p>
+      <p style="color:#666;font-size:0.88rem;margin-bottom:20px" id="sim-res-msg"></p>
+      <div class="sim-resultado-grid">
+        <div class="sim-stat"><div class="num" id="sim-res-ok">0</div><div class="lbl">✅ Correctas</div></div>
+        <div class="sim-stat mal"><div class="num" id="sim-res-err">0</div><div class="lbl">❌ Incorrectas</div></div>
+      </div>
+      <div class="sim-revision" id="sim-revision"></div>
+      <div class="resultado-btns" style="margin-top:16px">
+        <button class="btn-accion primario" onclick="iniciarSimulacro()">🔄 Nuevo simulacro</button>
+        <button class="btn-accion primario" onclick="mostrarPantalla('refuerzo')">🎯 Ir a Refuerzo</button>
+        <button class="btn-accion secundario" onclick="document.getElementById('sim-intro').style.display='';document.getElementById('sim-resultado').style.display='none'">← Volver</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <div class="fab" id="fab-resumen">
@@ -1044,6 +1184,53 @@ const flashcards = [
 ];
 
 // =========================================
+// VERDADERO / FALSO
+// =========================================
+const preguntasVF = [
+  { id:'vf1',  tema:'gases',        p:'El metano (CH₄) representa el 95-98% del Gas Natural.',                             r:true,  exp:'Correcto. El Gas Natural es casi totalmente metano.' },
+  { id:'vf2',  tema:'gases',        p:'El Gas Grado 3 (Butano) tiene densidad 1,52.',                                      r:false, exp:'Falso. Densidad del Butano es 1,91. La densidad 1,52 es del Propano (Grado 1).' },
+  { id:'vf3',  tema:'gases',        p:'El Propano pasa a estado líquido a -44°C.',                                         r:true,  exp:'Correcto. El Propano (C₃H₈) se licúa a -44°C.' },
+  { id:'vf4',  tema:'gases',        p:'El CO₂ es el gas tóxico que produce la combustión incompleta.',                     r:false, exp:'Falso. El gas tóxico de combustión incompleta es el CO (monóxido de carbono), no el CO₂.' },
+  { id:'vf5',  tema:'gases',        p:'Los cilindros de 45 kg de Propano contienen 24 m³ de gas.',                         r:true,  exp:'Correcto. 45 kg ÷ 1,875 kg/m³ = 24 m³ · 24 × 22.380 = 537.120 Kcal.' },
+  { id:'vf6',  tema:'gases',        p:'El Biogás se produce en presencia de oxígeno (ambiente aeróbico).',                 r:false, exp:'Falso. El Biogás se produce en ambiente ANAERÓBICO (sin oxígeno).' },
+  { id:'vf7',  tema:'gases',        p:'El Gas Natural de Mendoza tiene el mayor poder calorífico: 13.000 Kcal/m³.',        r:true,  exp:'Correcto. Mendoza: 13.000 Kcal/m³, el más alto. Referencia de cálculo: 9.300 Kcal/m³.' },
+  { id:'vf8',  tema:'nociones',     p:'El SIMELA fue establecido por la Ley 19.511 de 1972.',                              r:true,  exp:'Correcto. La Ley 19.511 establece el Sistema Métrico Legal Argentino de uso obligatorio.' },
+  { id:'vf9',  tema:'nociones',     p:'1 Caloría es el calor para elevar 1°C la temperatura de 1 kg de agua.',            r:false, exp:'Falso. 1 cal = calor para 1 GRAMO. Para 1 kg se necesita 1 KILOcaloría (1 kcal = 1.000 cal).' },
+  { id:'vf10', tema:'nociones',     p:'K = °C + 273. El agua hierve a 373 K.',                                            r:true,  exp:'Correcto. 100°C + 273 = 373 K.' },
+  { id:'vf11', tema:'nociones',     p:'Consumo (m³/h) = Potencia (Kcal/h) × Poder Calorífico (Kcal/m³).',                 r:false, exp:'Falso. Consumo = Potencia ÷ Poder Calorífico (se DIVIDE, no multiplica).' },
+  { id:'vf12', tema:'nociones',     p:'Los calefactores se ubican abajo porque el aire caliente sube por convección.',     r:true,  exp:'Correcto. Convección: el calor sube, el frío baja. Calefactores entre 10 y 20 cm del piso.' },
+  { id:'vf13', tema:'reguladores',  p:'La presión de salida del regulador domiciliario es de ~190 mmca (0,019 bar).',      r:true,  exp:'Correcto. Presión de salida: 0,019 bar ≈ 190 mmca. Entrada: 0,5 a 4 bar.' },
+  { id:'vf14', tema:'reguladores',  p:'Apretando el tornillo del regulador (rosca derecha) aumenta la presión de salida.',  r:false, exp:'Falso. Los reguladores tienen rosca IZQUIERDA: apretando (sentido antihorario) aumenta la presión.' },
+  { id:'vf15', tema:'reguladores',  p:'La NAG 235-2019 reemplaza a la NAG 135 y NAG 235-1995.',                            r:true,  exp:'Correcto. La NAG 235-2019 es la norma vigente para reguladores de presión.' },
+  { id:'vf16', tema:'reguladores',  p:'Los medidores rotativos se usan en instalaciones domiciliarias comunes.',           r:false, exp:'Falso. Los medidores de DIAFRAGMA son para uso domiciliario. Los ROTATIVOS son para grandes consumos (MAC).' },
+  { id:'vf17', tema:'herramientas', p:'La Llave Stillson se usa para tubos y tiene gran par de apriete.',                  r:true,  exp:'Correcto. La Stillson (llave de perro) es para tubos. Patentada en 1869.' },
+  { id:'vf18', tema:'herramientas', p:'La Termofusora une caños de acero mediante calor eléctrico.',                       r:false, exp:'Falso. La Termofusora une caños de POLIETILENO (PE), no de acero.' },
+  { id:'vf19', tema:'civil',        p:'La cañería de gas enterrada puede curvarse con radio mínimo de 1 metro.',           r:false, exp:'Falso. La cañería de gas NO se puede curvar ni torsionar bajo NINGUNA circunstancia. Solo codos.' },
+  { id:'vf20', tema:'civil',        p:'La Línea Municipal deslinda la parcela de la vía pública.',                         r:true,  exp:'Correcto. Límite entre la propiedad privada y la calle/vía pública.' },
+];
+
+// =========================================
+// COMPLETAR EL ESPACIO
+// =========================================
+const preguntasCompletar = [
+  { id:'cp1',  tema:'gases',        texto:'El Gas Grado 1 (Propano) tiene un poder calorífico de ___ Kcal/m³.',         ops:['9.300','13.000','22.380','27.482'], r:2, exp:'22.380 Kcal/m³ es el poder calorífico del Propano. El GN tiene ~9.300 Kcal/m³.' },
+  { id:'cp2',  tema:'gases',        texto:'Para quemar 1 m³ de Propano se necesitan ___ m³ de aire.',                   ops:['9','17','24','30'],                r:2, exp:'24 m³ de aire por m³ de Propano. El Butano necesita 30 m³.' },
+  { id:'cp3',  tema:'gases',        texto:'El Gas Grado 3 (Butano) pasa a estado líquido a ___.',                       ops:['-17°C','-44°C','0°C','-100°C'],   r:0, exp:'-17°C. El Propano se licúa a -44°C (temperatura más baja).' },
+  { id:'cp4',  tema:'gases',        texto:'La densidad del Gas Natural es de ___.',                                      ops:['0,60-0,65','1,00','1,52','1,91'], r:0, exp:'0,60-0,65. Más liviano que el aire (densidad 1,00), por eso sube en caso de fuga.' },
+  { id:'cp5',  tema:'nociones',     texto:'La fórmula de conversión de Celsius a Kelvin es K = °C + ___.',              ops:['100','200','273','373'],           r:2, exp:'K = °C + 273. El cero absoluto es 0 K = -273°C.' },
+  { id:'cp6',  tema:'nociones',     texto:'Consumo (m³/h) = Potencia (Kcal/h) ___ Poder Calorífico (Kcal/m³).',        ops:['×','÷','+','-'],                  r:1, exp:'Se divide: Consumo = Potencia ÷ PC. Ej: 3.000 ÷ 9.300 = 0,32 m³/h.' },
+  { id:'cp7',  tema:'nociones',     texto:'La transmisión de calor por movimiento de fluidos se llama ___.',            ops:['Conducción','Convección','Radiación','Combustión'], r:1, exp:'Convección: movimiento de fluidos. El calor sube, el frío baja.' },
+  { id:'cp8',  tema:'nociones',     texto:'El calor específico del agua es ___ kcal/kg·°C.',                            ops:['0,5','1','4,18','9,3'],            r:1, exp:'1 kcal/kg·°C. Es la referencia universal para cálculos de calor.' },
+  { id:'cp9',  tema:'reguladores',  texto:'Los reguladores domiciliarios se ubican en un nicho sobre la ___.',          ops:['medianera','línea municipal','vereda','fachada'], r:1, exp:'Sobre la línea municipal, con llave de paso tipo candado que los precede.' },
+  { id:'cp10', tema:'reguladores',  texto:'Las capacidades nominales de reguladores son: 6, 10, 25, 40, ___, 100 m³/h.', ops:['50','60','65','75'],              r:2, exp:'La secuencia es 6, 10, 25, 40, 65, 100 m³/h.' },
+  { id:'cp11', tema:'reguladores',  texto:'La inclinación de la rosca cónica Whitworth es de 1 mm cada ___ mm.',        ops:['8','12','16','20'],                r:2, exp:'1 mm de inclinación por cada 16 mm de longitud de rosca (BSP cónica).' },
+  { id:'cp12', tema:'herramientas', texto:'La Columna de Agua mide presiones bajas en ___.',                            ops:['bar','kg/cm²','mmca','Pascal'],    r:2, exp:'mmca (milímetros de columna de agua). Verifica presión del regulador (~180 mmca).' },
+  { id:'cp13', tema:'herramientas', texto:'Las conexiones de gas se sellan con ___ o grasa grafitada.',                 ops:['silicona','PVC','sella-roscas','pegamento'], r:2, exp:'Sella-roscas (pasta aprobada) o grasa grafitada. Nunca silicona común.' },
+  { id:'cp14', tema:'civil',        texto:'El cemento se obtiene calcinando a ___ °C piedra caliza, arcilla y mineral de hierro.', ops:['800','1.100','1.450','1.800'], r:2, exp:'1.450°C. El proceso produce clínker que luego se muele con yeso.' },
+  { id:'cp15', tema:'civil',        texto:'El VEP significa Verificación de ___ del Estado Parcelario.',                ops:['Validez','Vigencia','Subsistencia','Veracidad'], r:2, exp:'VEP: Verificación de Subsistencia del Estado Parcelario. Documento requerido en la distribuidora.' },
+];
+
+// =========================================
 // PROGRESO — localStorage con fallback en memoria
 // =========================================
 let _progresoMemoria = {};
@@ -1142,7 +1329,7 @@ function mostrarPantalla(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('pantalla-' + id).classList.add('active');
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  const orden = ['inicio','quiz','flash','calc','resumen','refuerzo'];
+  const orden = ['inicio','quiz','flash','simulacro','calc','resumen','refuerzo'];
   const idx = orden.indexOf(id);
   if (idx >= 0) document.querySelectorAll('nav button')[idx].classList.add('active');
 
@@ -1151,6 +1338,12 @@ function mostrarPantalla(id) {
   if (id === 'calc') inicializarCalc();
   if (id === 'resumen') renderizarResumen();
   if (id === 'refuerzo') inicializarRefuerzo();
+  if (id === 'simulacro') {
+    clearInterval(simEstado?.timerInterval);
+    document.getElementById('sim-intro').style.display = '';
+    document.getElementById('sim-activo').style.display = 'none';
+    document.getElementById('sim-resultado').style.display = 'none';
+  }
 }
 
 // =========================================
@@ -1292,6 +1485,313 @@ function mostrarResultado() {
 }
 
 function reiniciarQuiz() { iniciarQuiz(quizEstado.tema); }
+
+// =========================================
+// QUIZ — SELECTOR DE TIPO
+// =========================================
+let tipoEjercicioSeleccionado = 'mc';
+
+function selTipoEjercicio(tipo, card) {
+  tipoEjercicioSeleccionado = tipo;
+  document.querySelectorAll('.tipo-card').forEach(c => c.classList.remove('sel'));
+  card.classList.add('sel');
+}
+
+function iniciarQuizSeleccionado() {
+  if (tipoEjercicioSeleccionado === 'vf')       iniciarVF(temaQuizSeleccionado);
+  else if (tipoEjercicioSeleccionado === 'completar') iniciarCompletar(temaQuizSeleccionado);
+  else iniciarQuiz(temaQuizSeleccionado);
+}
+
+// =========================================
+// VERDADERO / FALSO
+// =========================================
+let vfEstado = { pool:[], indice:0, aciertos:0, tema:'', sesionFallos:[] };
+
+function iniciarVF(tema) {
+  let pool = tema === 'todos' ? [...preguntasVF] : preguntasVF.filter(q => q.tema === tema);
+  pool = mezclar(pool).slice(0, Math.min(pool.length, 10));
+  vfEstado = { pool, indice:0, aciertos:0, tema, sesionFallos:[] };
+
+  document.getElementById('quiz-selector').style.display = 'none';
+  document.getElementById('quiz-activo').style.display = '';
+  document.getElementById('quiz-resultado').style.display = 'none';
+  document.getElementById('quiz-tema-label').textContent = (temasInfo[tema]?.label || tema) + ' · V/F';
+  mostrarPreguntaVF();
+}
+
+function mostrarPreguntaVF() {
+  const { pool, indice } = vfEstado;
+  if (indice >= pool.length) { mostrarResultadoVF(); return; }
+  const q = pool[indice];
+  document.getElementById('pregunta-texto').textContent = q.p;
+  document.getElementById('quiz-progreso').textContent = `${indice+1} / ${pool.length}`;
+  document.getElementById('barra-fill').style.width = `${(indice/pool.length)*100}%`;
+  document.getElementById('opciones-container').innerHTML = `
+    <div class="vf-botones">
+      <button class="btn-falso" data-v="false" onclick="seleccionarVF(false,this)">❌ FALSO</button>
+      <button class="btn-verdadero" data-v="true" onclick="seleccionarVF(true,this)">✅ VERDADERO</button>
+    </div>`;
+  document.getElementById('feedback-box').style.display = 'none';
+  const btnSig = document.getElementById('btn-siguiente');
+  btnSig.disabled = true; btnSig.textContent = 'Respondé para continuar →';
+  btnSig.onclick = () => { vfEstado.indice++; mostrarPreguntaVF(); };
+}
+
+function seleccionarVF(respuesta, btn) {
+  const q = vfEstado.pool[vfEstado.indice];
+  document.querySelectorAll('.btn-verdadero,.btn-falso').forEach(b => b.disabled = true);
+  const correcta = (respuesta === q.r);
+  if (correcta) { vfEstado.aciertos++; btn.classList.add('correcta'); }
+  else {
+    btn.classList.add('incorrecta');
+    document.querySelectorAll('.btn-verdadero,.btn-falso').forEach(b => {
+      if ((b.dataset.v === 'true') === q.r) b.classList.add('correcta');
+    });
+    vfEstado.sesionFallos.push(q.p);
+  }
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box ' + (correcta ? 'ok' : 'mal');
+  fb.innerHTML = (correcta ? '✅ <strong>¡Correcto!</strong> ' : '❌ <strong>Incorrecto.</strong> ') + q.exp;
+  fb.style.display = 'block';
+  const btnSig = document.getElementById('btn-siguiente');
+  btnSig.disabled = false; btnSig.textContent = 'Siguiente →';
+  registrarRespuesta(q.id, q.tema, correcta, '[V/F] ' + q.p);
+}
+
+function mostrarResultadoVF() {
+  document.getElementById('quiz-activo').style.display = 'none';
+  document.getElementById('quiz-resultado').style.display = '';
+  const { aciertos, pool, sesionFallos } = vfEstado;
+  const pct = Math.round((aciertos/pool.length)*100);
+  const el = document.getElementById('resultado-puntaje');
+  el.textContent = `${aciertos}/${pool.length}`;
+  el.style.color = pct >= 70 ? 'var(--verde)' : pct >= 50 ? 'var(--naranja)' : 'var(--rojo)';
+  document.getElementById('resultado-emoji').textContent = pct >= 80 ? '🏆' : pct >= 60 ? '💪' : '📖';
+  document.getElementById('resultado-msg').textContent = pct >= 80 ? '¡Excelente dominio de V/F!' : pct >= 60 ? '¡Bien! Revisá las que fallaste.' : 'Repasá los conceptos en Refuerzo.';
+  const fc = document.getElementById('resultado-fallos-container');
+  fc.innerHTML = sesionFallos.length > 0
+    ? `<div class="resultado-detalle"><h4>📌 Para repasar:</h4><ul class="fallos-list">${sesionFallos.map(f=>`<li>${f}</li>`).join('')}</ul></div>`
+    : '<div style="color:var(--verde);font-weight:600">✅ ¡Sin errores!</div>';
+  document.getElementById('btn-siguiente').onclick = null;
+  document.querySelectorAll('.resultado-btns .btn-accion')[0].onclick = () => iniciarVF(vfEstado.tema);
+  renderizarInicio();
+}
+
+// =========================================
+// COMPLETAR EL ESPACIO
+// =========================================
+let completarEstado = { pool:[], indice:0, aciertos:0, tema:'', sesionFallos:[] };
+
+function iniciarCompletar(tema) {
+  let pool = tema === 'todos' ? [...preguntasCompletar] : preguntasCompletar.filter(q => q.tema === tema);
+  if (!pool.length) { alert('No hay preguntas de Completar para ese tema. Probá con Todos los temas.'); return; }
+  pool = mezclar(pool).slice(0, Math.min(pool.length, 10));
+  completarEstado = { pool, indice:0, aciertos:0, tema, sesionFallos:[] };
+
+  document.getElementById('quiz-selector').style.display = 'none';
+  document.getElementById('quiz-activo').style.display = '';
+  document.getElementById('quiz-resultado').style.display = 'none';
+  document.getElementById('quiz-tema-label').textContent = (temasInfo[tema]?.label || tema) + ' · Completar';
+  mostrarPreguntaCompletar();
+}
+
+function mostrarPreguntaCompletar() {
+  const { pool, indice } = completarEstado;
+  if (indice >= pool.length) { mostrarResultadoCompletar(); return; }
+  const q = pool[indice];
+  const enunciadoHTML = q.texto.replace('___', '<span class="completar-blank">___</span>');
+  document.getElementById('pregunta-texto').innerHTML = `<div class="completar-enunciado">${enunciadoHTML}</div>`;
+  document.getElementById('quiz-progreso').textContent = `${indice+1} / ${pool.length}`;
+  document.getElementById('barra-fill').style.width = `${(indice/pool.length)*100}%`;
+  const mezcladas = mezclar(q.ops.map((o,i) => ({ texto:o, original:i })));
+  document.getElementById('opciones-container').innerHTML = mezcladas.map(({texto,original}) =>
+    `<button class="opcion" data-idx="${original}" onclick="seleccionarCompletar(${original},this)">${texto}</button>`
+  ).join('');
+  document.getElementById('feedback-box').style.display = 'none';
+  const btnSig = document.getElementById('btn-siguiente');
+  btnSig.disabled = true; btnSig.textContent = 'Respondé para continuar →';
+  btnSig.onclick = () => { completarEstado.indice++; mostrarPreguntaCompletar(); };
+}
+
+function seleccionarCompletar(idx, btnElegido) {
+  const q = completarEstado.pool[completarEstado.indice];
+  document.querySelectorAll('.opcion').forEach(b => b.disabled = true);
+  const correcta = (idx === q.r);
+  if (correcta) { completarEstado.aciertos++; btnElegido.classList.add('correcta'); }
+  else {
+    btnElegido.classList.add('incorrecta');
+    document.querySelectorAll('.opcion').forEach(b => { if (parseInt(b.dataset.idx) === q.r) b.classList.add('mostrar-correcta'); });
+    completarEstado.sesionFallos.push(q.texto);
+  }
+  // Mostrar la respuesta en el enunciado
+  const blank = document.querySelector('.completar-blank');
+  if (blank) { blank.textContent = q.ops[q.r]; blank.className = 'completar-resultado'; }
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box ' + (correcta ? 'ok' : 'mal');
+  fb.innerHTML = (correcta ? '✅ <strong>¡Correcto!</strong> ' : '❌ <strong>Incorrecto.</strong> ') + q.exp;
+  fb.style.display = 'block';
+  const btnSig = document.getElementById('btn-siguiente');
+  btnSig.disabled = false; btnSig.textContent = 'Siguiente →';
+  registrarRespuesta(q.id, q.tema, correcta, '[Completar] ' + q.texto);
+}
+
+function mostrarResultadoCompletar() {
+  document.getElementById('quiz-activo').style.display = 'none';
+  document.getElementById('quiz-resultado').style.display = '';
+  const { aciertos, pool, sesionFallos } = completarEstado;
+  const pct = Math.round((aciertos/pool.length)*100);
+  const el = document.getElementById('resultado-puntaje');
+  el.textContent = `${aciertos}/${pool.length}`;
+  el.style.color = pct >= 70 ? 'var(--verde)' : pct >= 50 ? 'var(--naranja)' : 'var(--rojo)';
+  document.getElementById('resultado-emoji').textContent = pct >= 80 ? '🏆' : pct >= 60 ? '💪' : '📖';
+  document.getElementById('resultado-msg').textContent = pct >= 80 ? '¡Excelente! Dominás los conceptos.' : '¡Revisá los espacios en blanco que fallaste!';
+  const fc = document.getElementById('resultado-fallos-container');
+  fc.innerHTML = sesionFallos.length > 0
+    ? `<div class="resultado-detalle"><h4>📌 Para repasar:</h4><ul class="fallos-list">${sesionFallos.map(f=>`<li>${f.replace('___','[ ? ]')}</li>`).join('')}</ul></div>`
+    : '<div style="color:var(--verde);font-weight:600">✅ ¡Completaste todo correctamente!</div>';
+  document.getElementById('btn-siguiente').onclick = null;
+  document.querySelectorAll('.resultado-btns .btn-accion')[0].onclick = () => iniciarCompletar(completarEstado.tema);
+  renderizarInicio();
+}
+
+// =========================================
+// SIMULACRO DE EVALUACIÓN
+// =========================================
+let simEstado = { pool:[], indice:0, respuestas:[], timerInterval:null, segundosRestantes:1800 };
+
+function iniciarSimulacro() {
+  // Mezclar 20 preguntas de todos los tipos
+  const mc  = mezclar([...preguntas]).slice(0,9).map(q => ({...q, tipo:'mc'}));
+  const vf  = mezclar([...preguntasVF]).slice(0,6).map(q => ({...q, tipo:'vf'}));
+  const cp  = mezclar([...preguntasCompletar]).slice(0,5).map(q => ({...q, tipo:'completar'}));
+  const pool = mezclar([...mc, ...vf, ...cp]);
+
+  simEstado = { pool, indice:0, respuestas:[], timerInterval:null, segundosRestantes:1800 };
+
+  document.getElementById('sim-intro').style.display = 'none';
+  document.getElementById('sim-activo').style.display = '';
+  document.getElementById('sim-resultado').style.display = 'none';
+
+  simIniciarTimer();
+  mostrarPreguntaSim();
+}
+
+function simIniciarTimer() {
+  clearInterval(simEstado.timerInterval);
+  simEstado.timerInterval = setInterval(() => {
+    simEstado.segundosRestantes--;
+    const m = Math.floor(simEstado.segundosRestantes / 60);
+    const s = simEstado.segundosRestantes % 60;
+    const timerEl = document.getElementById('sim-timer');
+    timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (simEstado.segundosRestantes <= 60) timerEl.classList.add('urgente');
+    if (simEstado.segundosRestantes <= 0) { clearInterval(simEstado.timerInterval); mostrarResultadoSim(); }
+  }, 1000);
+}
+
+function mostrarPreguntaSim() {
+  const { pool, indice } = simEstado;
+  if (indice >= pool.length) { clearInterval(simEstado.timerInterval); mostrarResultadoSim(); return; }
+  const q = pool[indice];
+  document.getElementById('sim-progreso').textContent = `${indice+1} / ${pool.length}`;
+  document.getElementById('sim-barra-fill').style.width = `${(indice/pool.length)*100}%`;
+  document.getElementById('sim-tipo-badge').textContent = q.tipo === 'mc' ? '📝 Opción múltiple' : q.tipo === 'vf' ? '✅❌ Verdadero / Falso' : '✏️ Completar';
+
+  const btnSig = document.getElementById('sim-btn-sig');
+  btnSig.disabled = true; btnSig.textContent = 'Respondé para continuar →';
+
+  const cont = document.getElementById('sim-opciones-container');
+  if (q.tipo === 'vf') {
+    document.getElementById('sim-pregunta-texto').textContent = q.p;
+    cont.innerHTML = `<div class="vf-botones">
+      <button class="btn-falso" data-v="false" onclick="simResponder(false,this)">❌ FALSO</button>
+      <button class="btn-verdadero" data-v="true" onclick="simResponder(true,this)">✅ VERDADERO</button>
+    </div>`;
+  } else if (q.tipo === 'completar') {
+    document.getElementById('sim-pregunta-texto').innerHTML = `<div class="completar-enunciado">${q.texto.replace('___','<span class="completar-blank">___</span>')}</div>`;
+    const mezcladas = mezclar(q.ops.map((o,i) => ({texto:o,original:i})));
+    cont.innerHTML = mezcladas.map(({texto,original}) =>
+      `<button class="opcion" data-idx="${original}" onclick="simResponder(${original},this)">${texto}</button>`
+    ).join('');
+  } else {
+    document.getElementById('sim-pregunta-texto').textContent = q.p;
+    const mezcladas = mezclar(q.ops.map((o,i) => ({texto:o,original:i})));
+    cont.innerHTML = mezcladas.map(({texto,original}) =>
+      `<button class="opcion" data-idx="${original}" onclick="simResponder(${original},this)">${texto}</button>`
+    ).join('');
+  }
+}
+
+function simResponder(respuesta, btn) {
+  const q = simEstado.pool[simEstado.indice];
+  // Deshabilitar todas las opciones sin mostrar correcto/incorrecto (modo examen)
+  document.querySelectorAll('#sim-opciones-container .opcion, #sim-opciones-container .btn-verdadero, #sim-opciones-container .btn-falso')
+    .forEach(b => b.disabled = true);
+  btn.style.opacity = '0.7'; btn.style.fontWeight = '700';
+
+  const correcta = q.tipo === 'vf' ? (respuesta === q.r) : (respuesta === q.r);
+  simEstado.respuestas.push({ q, correcta, respuestaDada: respuesta });
+
+  const btnSig = document.getElementById('sim-btn-sig');
+  btnSig.disabled = false;
+  btnSig.onclick = () => { simEstado.indice++; mostrarPreguntaSim(); };
+}
+
+function mostrarResultadoSim() {
+  clearInterval(simEstado.timerInterval);
+  document.getElementById('sim-activo').style.display = 'none';
+  document.getElementById('sim-resultado').style.display = '';
+  document.getElementById('sim-intro').style.display = 'none';
+
+  const { respuestas, pool } = simEstado;
+  const correctas = respuestas.filter(r => r.correcta).length;
+  const total = pool.length;
+  const pct = Math.round((correctas / total) * 100);
+  const aprobado = pct >= 70;
+
+  document.getElementById('sim-res-emoji').textContent = pct >= 90 ? '🏆' : pct >= 70 ? '🎓' : pct >= 50 ? '💪' : '📖';
+  document.getElementById('sim-res-puntaje').textContent = `${correctas}/${total} — ${pct}%`;
+  document.getElementById('sim-res-puntaje').style.color = aprobado ? 'var(--verde)' : 'var(--rojo)';
+  document.getElementById('sim-res-estado').textContent = aprobado ? '✅ ¡APROBADO!' : '❌ No alcanzó el 70%';
+  document.getElementById('sim-res-estado').style.color = aprobado ? 'var(--verde)' : 'var(--rojo)';
+  document.getElementById('sim-res-msg').textContent = aprobado
+    ? `¡Excelente! Dominás el contenido del curso.`
+    : `Necesitás ${Math.ceil(total*0.7) - correctas} respuestas más para aprobar. Usá el Refuerzo.`;
+  document.getElementById('sim-res-ok').textContent = correctas;
+  document.getElementById('sim-res-err').textContent = total - correctas;
+
+  // Registrar todas las respuestas en el progreso
+  respuestas.forEach(({ q, correcta }) => {
+    const tipo = q.tipo === 'vf' ? '[V/F] ' : q.tipo === 'completar' ? '[Completar] ' : '';
+    const texto = tipo + (q.p || q.texto || '');
+    registrarRespuesta(q.id, q.tema, correcta, '[Simulacro] ' + texto);
+  });
+
+  // Mostrar revisión detallada
+  const rev = document.getElementById('sim-revision');
+  const incorrectas = respuestas.filter(r => !r.correcta);
+  if (incorrectas.length) {
+    rev.innerHTML = `<h4 style="color:var(--rojo);margin-bottom:10px">📌 ${incorrectas.length} para repasar:</h4>` +
+      incorrectas.map(({ q }) => `
+        <div class="sim-rev-item mal">
+          <div class="sim-tipo-mini">${q.tipo === 'vf' ? 'V/F' : q.tipo === 'completar' ? 'Completar' : 'Múltiple'} · ${temaNombres[q.tema]||q.tema}</div>
+          <div>${q.p || q.texto}</div>
+          <div style="font-size:0.8rem;color:#888;margin-top:4px">✔ ${q.tipo==='vf' ? (q.r ? 'VERDADERO' : 'FALSO') : (q.ops ? q.ops[q.r] : '')}</div>
+        </div>`).join('');
+  } else {
+    rev.innerHTML = '<div style="color:var(--verde);font-weight:600;margin-top:8px">✅ ¡Respondiste todo correctamente!</div>';
+  }
+  renderizarInicio();
+}
+
+function confirmarAbandonarSim() {
+  if (confirm('¿Seguro que querés abandonar el simulacro? Se perderá el progreso.')) {
+    clearInterval(simEstado.timerInterval);
+    document.getElementById('sim-activo').style.display = 'none';
+    document.getElementById('sim-intro').style.display = '';
+  }
+}
 
 // =========================================
 // FLASHCARDS
