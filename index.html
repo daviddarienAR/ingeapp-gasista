@@ -2244,19 +2244,19 @@ function renderizarResumen() {
     const etiq     = pct >= 70 ? '✅ Bien' : pct >= 50 ? '⚠️ Regular' : '❌ Repasar';
     const colorEtiq = pct >= 70 ? 'var(--verde)' : pct >= 50 ? 'var(--naranja)' : 'var(--rojo)';
 
-    // Separar por tipo (quiz vs flashcard) para mostrar con distinto ícono
-    const falladasQuiz  = preguntas.filter(q => q.tema === tema && prog[q.id] && prog[q.id].errores > 0)
-      .sort((a,b) => prog[b.id].errores - prog[a.id].errores);
-    const falladasFlash = flashcards.filter(f => f.tema === tema && prog[f.id] && prog[f.id].errores > 0)
-      .sort((a,b) => prog[b.id].errores - prog[a.id].errores);
-    const bienQuiz  = preguntas.filter(q => q.tema === tema && prog[q.id] && prog[q.id].errores === 0);
-    const bienFlash = flashcards.filter(f => f.tema === tema && prog[f.id] && prog[f.id].errores === 0);
-    const noVistasQuiz  = preguntas.filter(q => q.tema === tema && !prog[q.id]);
-    const noVistasFlash = flashcards.filter(f => f.tema === tema && !prog[f.id]);
+    // Separar por tipo para mostrar con distinto ícono
+    const err0 = (arr) => arr.filter(q => q.tema === tema && prog[q.id]?.errores > 0).sort((a,b) => prog[b.id].errores - prog[a.id].errores);
+    const bien0 = (arr) => arr.filter(q => q.tema === tema && prog[q.id]?.errores === 0);
+    const nv0   = (arr) => arr.filter(q => q.tema === tema && !prog[q.id]);
 
-    const totalFalladas = falladasQuiz.length + falladasFlash.length;
-    const totalBien     = bienQuiz.length + bienFlash.length;
-    const totalNoVistas = noVistasQuiz.length + noVistasFlash.length;
+    const falladasQuiz    = err0(preguntas);
+    const falladasVF      = err0(preguntasVF);
+    const falladasCP      = err0(preguntasCompletar);
+    const falladasFlash   = err0(flashcards);
+
+    const totalFalladas = falladasQuiz.length + falladasVF.length + falladasCP.length + falladasFlash.length;
+    const totalBien     = bien0(preguntas).length + bien0(preguntasVF).length + bien0(preguntasCompletar).length + bien0(flashcards).length;
+    const totalNoVistas = nv0(preguntas).length + nv0(preguntasVF).length + nv0(preguntasCompletar).length + nv0(flashcards).length;
 
     html += `
     <div class="acord nivel-${nivel}">
@@ -2273,14 +2273,22 @@ function renderizarResumen() {
           <p style="font-size:0.82rem;font-weight:600;color:var(--rojo);margin-bottom:8px">❌ ${totalFalladas} con errores:</p>
           ${falladasQuiz.map(q => `
             <div class="fallada-item" onclick="abrirModuloTema('${tema}')">
-              <span class="fi-icon">📝</span>
-              <span>${q.p}</span>
+              <span class="fi-icon">📝</span><span>${q.p}</span>
+              <span class="fi-count">${prog[q.id].errores}x</span>
+            </div>`).join('')}
+          ${falladasVF.map(q => `
+            <div class="fallada-item" onclick="abrirModuloTema('${tema}')">
+              <span class="fi-icon">✅❌</span><span>${q.p}</span>
+              <span class="fi-count">${prog[q.id].errores}x</span>
+            </div>`).join('')}
+          ${falladasCP.map(q => `
+            <div class="fallada-item" onclick="abrirModuloTema('${tema}')">
+              <span class="fi-icon">✏️</span><span>${q.texto}</span>
               <span class="fi-count">${prog[q.id].errores}x</span>
             </div>`).join('')}
           ${falladasFlash.map(f => `
             <div class="fallada-item" onclick="abrirModuloTema('${tema}')">
-              <span class="fi-icon">🃏</span>
-              <span>${f.p}</span>
+              <span class="fi-icon">🃏</span><span>${f.p}</span>
               <span class="fi-count">${prog[f.id].errores}x</span>
             </div>`).join('')}
           <button class="btn-accion primario" style="margin-top:10px;width:100%" onclick="abrirModuloTema('${tema}')">
@@ -2520,13 +2528,19 @@ function inicializarRefuerzo() {
 function abrirModuloTema(tema) {
   mostrarPantalla('refuerzo');
   const prog = cargarProgreso();
-  const falladas = preguntas.filter(q => q.tema === tema && prog[q.id] && prog[q.id].errores > 0)
-    .sort((a,b) => prog[b.id].errores - prog[a.id].errores);
+  const err = q => prog[q.id]?.errores > 0;
+  const tag = tipo => q => ({ ...q, _tipo: tipo });
+  const falladas = mezclar([
+    ...preguntas.filter(q => q.tema === tema && err(q)).map(tag('mc')),
+    ...preguntasVF.filter(q => q.tema === tema && err(q)).map(tag('vf')),
+    ...preguntasCompletar.filter(q => q.tema === tema && err(q)).map(tag('completar')),
+    ...flashcards.filter(q => q.tema === tema && err(q)).map(tag('flash')),
+  ]);
 
   moduloActivo = {
     tema,
     leccionIdx: 0,
-    practicaPool: mezclar(falladas),
+    practicaPool: falladas,
     practicaIdx: 0,
     practicaAciertos: 0,
   };
@@ -2601,44 +2615,81 @@ function mostrarPreguntaPractica() {
   if (practicaIdx >= practicaPool.length) { mostrarResultadoPractica(); return; }
 
   const q = practicaPool[practicaIdx];
-  const prog = cargarProgreso();
-  const veces = prog[q.id]?.errores || 0;
-  document.getElementById('refuerzo-pregunta-texto').innerHTML =
-    `<span style="font-size:0.78rem;color:var(--rojo);font-weight:600">Fallaste esta ${veces}x</span><br><br>${q.p}`;
+  const tipo = q._tipo || 'mc';
+  const veces = cargarProgreso()[q.id]?.errores || 0;
+  const tipoIcon = { mc:'📝', vf:'✅❌', completar:'✏️', flash:'🃏' }[tipo] || '📝';
+
   document.getElementById('refuerzo-progreso').textContent = `${practicaIdx+1} / ${practicaPool.length}`;
   document.getElementById('barra-fill-refuerzo').style.width = `${(practicaIdx/practicaPool.length)*100}%`;
+  document.getElementById('refuerzo-pregunta-texto').innerHTML =
+    `<span style="font-size:0.78rem;color:var(--rojo);font-weight:600">${tipoIcon} Fallaste ${veces}x</span><br><br>${q.p || q.texto}`;
+  document.getElementById('refuerzo-feedback').style.display = 'none';
 
   const cont = document.getElementById('refuerzo-opciones');
-  const mezcladas = mezclar(q.ops.map((o,i)=>({texto:o,original:i})));
-  cont.innerHTML = mezcladas.map(({texto,original}) =>
-    `<button class="opcion" data-idx="${original}" onclick="refuerzoResponder(${original},this)">${texto}</button>`
-  ).join('');
+  if (tipo === 'flash') {
+    cont.innerHTML = `<button class="opcion" onclick="refuerzoRevelarFlash()" style="background:var(--verde-claro);border-color:var(--verde);color:var(--verde-oscuro)">🔍 Ver respuesta</button>`;
+  } else if (tipo === 'vf') {
+    cont.innerHTML = `
+      <button class="opcion" data-idx="1" onclick="refuerzoResponder(1,this)">✅ Verdadero</button>
+      <button class="opcion" data-idx="0" onclick="refuerzoResponder(0,this)">❌ Falso</button>`;
+  } else {
+    const ops = q.ops || [];
+    const mezcladas = mezclar(ops.map((o,i) => ({ texto:o, original:i })));
+    cont.innerHTML = mezcladas.map(({texto,original}) =>
+      `<button class="opcion" data-idx="${original}" onclick="refuerzoResponder(${original},this)">${texto}</button>`
+    ).join('');
+  }
 
-  document.getElementById('refuerzo-feedback').style.display = 'none';
   const btn = document.getElementById('refuerzo-btn-sig');
   btn.disabled = true;
   btn.textContent = 'Respondé para continuar →';
 }
 
+function refuerzoRevelarFlash() {
+  const q = moduloActivo.practicaPool[moduloActivo.practicaIdx];
+  const cont = document.getElementById('refuerzo-opciones');
+  cont.innerHTML = `
+    <div style="background:var(--verde-claro);border:1px solid var(--verde-suave);border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:0.87rem;line-height:1.7;color:#1b3a1c">${q.r}</div>
+    <button class="opcion" data-idx="1" onclick="refuerzoResponder(1,this)" style="background:#e8f5e9">✅ Lo sabía</button>
+    <button class="opcion" data-idx="0" onclick="refuerzoResponder(0,this)" style="background:#ffebee">❌ No lo sabía</button>`;
+}
+
 function refuerzoResponder(idx, btn) {
   const q = moduloActivo.practicaPool[moduloActivo.practicaIdx];
+  const tipo = q._tipo || 'mc';
   document.querySelectorAll('#refuerzo-opciones .opcion').forEach(b => b.disabled = true);
-  const correcta = idx === q.r;
+
+  let correcta;
+  if (tipo === 'vf')   correcta = (idx === 1) === q.r;  // 1→true, 0→false
+  else if (tipo === 'flash') correcta = idx === 1;       // 1=lo sabía
+  else                 correcta = idx === q.r;
+
   if (correcta) { moduloActivo.practicaAciertos++; btn.classList.add('correcta'); }
   else {
     btn.classList.add('incorrecta');
-    document.querySelectorAll('#refuerzo-opciones .opcion').forEach(b => {
-      if (parseInt(b.dataset.idx) === q.r) b.classList.add('mostrar-correcta');
-    });
+    if (tipo === 'vf') {
+      const idxCorrecto = q.r ? 1 : 0;
+      document.querySelectorAll('#refuerzo-opciones .opcion').forEach(b => {
+        if (parseInt(b.dataset.idx) === idxCorrecto) b.classList.add('mostrar-correcta');
+      });
+    } else if (tipo !== 'flash') {
+      document.querySelectorAll('#refuerzo-opciones .opcion').forEach(b => {
+        if (parseInt(b.dataset.idx) === q.r) b.classList.add('mostrar-correcta');
+      });
+    }
   }
   const fb = document.getElementById('refuerzo-feedback');
   fb.className = 'feedback-box ' + (correcta ? 'ok' : 'mal');
-  fb.innerHTML = (correcta ? '✅ <strong>¡Correcto!</strong> ' : '❌ <strong>Incorrecto.</strong> ') + q.exp;
+  if (tipo === 'flash') {
+    fb.innerHTML = correcta ? '✅ <strong>¡Genial!</strong> Seguí así.' : `❌ <strong>Repasalo.</strong> ${q.r}`;
+  } else {
+    fb.innerHTML = (correcta ? '✅ <strong>¡Correcto!</strong> ' : '❌ <strong>Incorrecto.</strong> ') + (q.exp || '');
+  }
   fb.style.display = 'block';
+  registrarRespuesta(q.id, q.tema, correcta, (q.p || q.texto || ''));
   const btnSig = document.getElementById('refuerzo-btn-sig');
   btnSig.disabled = false;
   btnSig.textContent = 'Siguiente →';
-  registrarRespuesta(q.id, q.tema, correcta, q.p);
 }
 
 function refuerzoSiguiente() {
