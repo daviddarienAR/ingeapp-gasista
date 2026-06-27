@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IngeAPP - Repaso Gasista</title>
+<style>
+  :root {
+    --verde: #2d7d3a;
+    --verde-oscuro: #1a4f22;
+    --verde-medio: #3a9648;
+    --verde-claro: #e8f5e9;
+    --verde-suave: #c8e6c9;
+    --verde-accent: #66bb6a;
+    --naranja: #f57c00;
+    --rojo: #c62828;
+    --rojo-suave: #ffebee;
+    --azul: #1565c0;
+    --gris: #f5f5f5;
+    --texto: #1b2e1c;
+    --borde: #c8ddc9;
+    --blanco: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #e8f5e9; color: var(--texto); min-height: 100vh; }
+
+  header {
+    background: linear-gradient(135deg, var(--verde-oscuro), var(--verde));
+    color: white;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+  }
+  .header-tree { font-size: 2.8rem; line-height: 1; }
+  .header-titles h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+  .header-titles p { font-size: 0.78rem; opacity: 0.85; margin-top: 2px; }
+  .header-badges { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+  .badge-stat {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .badge-stat:hover { background: rgba(255,255,255,0.25); }
+
+  nav {
+    display: flex;
+    gap: 0;
+    background: var(--verde-oscuro);
+    overflow-x: auto;
+  }
+  nav button {
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.75);
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  nav button.active, nav button:hover {
+    color: white;
+    border-bottom-color: var(--verde-accent);
+    background: rgba(255,255,255,0.07);
+  }
+
+  main { max-width: 820px; margin: 0 auto; padding: 18px 16px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin-bottom: 16px;
+    border: 1px solid var(--borde);
+  }
+  .card h2 { color: var(--verde); margin-bottom: 12px; font-size: 1.15rem; }
+  .card h3 { color: var(--verde-oscuro); margin-bottom: 12px; font-size: 1rem; }
+
+  /* INICIO */
+  .inicio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-top: 4px;
+  }
+  .tema-card {
+    background: white;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border: 2px solid var(--borde);
+    transition: all 0.2s;
+    position: relative;
+  }
+  .tema-card:hover { border-color: var(--verde); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(45,125,58,0.15); }
+  .tema-card .icon { font-size: 2.4rem; margin-bottom: 8px; }
+  .tema-card h3 { font-size: 0.9rem; color: var(--texto); }
+  .tema-card .qty { font-size: 0.78rem; color: #888; margin-top: 4px; }
+  .tema-card .error-badge {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: var(--rojo);
+    color: white;
+    border-radius: 50%;
+    width: 22px; height: 22px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* QUIZ */
+  .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+  .quiz-tema-badge { background: var(--verde); color: white; padding: 4px 14px; border-radius: 20px; font-size: 0.82rem; }
+  .quiz-progreso { font-size: 0.88rem; color: #666; }
+  .barra-progreso { height: 6px; background: var(--verde-suave); border-radius: 3px; margin-bottom: 18px; }
+  .barra-fill { height: 100%; background: var(--verde); border-radius: 3px; transition: width 0.4s; }
+  .pregunta-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 14px; border: 1px solid var(--borde); }
+  .pregunta-card h2 { font-size: 1.05rem; line-height: 1.6; margin-bottom: 20px; color: var(--texto); }
+  .opciones { display: flex; flex-direction: column; gap: 10px; }
+  .opcion {
+    padding: 13px 16px; border: 2px solid var(--borde); border-radius: 10px;
+    cursor: pointer; font-size: 0.92rem; transition: all 0.15s; text-align: left; background: white; color: var(--texto);
+  }
+  .opcion:hover:not(:disabled) { border-color: var(--verde); background: var(--verde-claro); }
+  .opcion.correcta { border-color: #2e7d32; background: #e8f5e9; color: #1a4f22; font-weight: 600; }
+  .opcion.incorrecta { border-color: var(--rojo); background: var(--rojo-suave); color: #7a1a1a; }
+  .opcion.mostrar-correcta { border-color: #2e7d32; background: #e8f5e9; }
+  .opcion:disabled { cursor: default; }
+  .feedback-box { padding: 14px 16px; border-radius: 10px; margin-bottom: 10px; font-size: 0.9rem; line-height: 1.6; display: none; }
+  .feedback-box.ok { background: #e8f5e9; border-left: 4px solid var(--verde); color: #1a4f22; }
+  .feedback-box.mal { background: var(--rojo-suave); border-left: 4px solid var(--rojo); color: #7a1a1a; }
+  .btn-siguiente {
+    background: var(--verde); color: white; border: none;
+    padding: 13px 26px; border-radius: 8px; font-size: 0.98rem;
+    cursor: pointer; margin-top: 14px; width: 100%;
+    font-weight: 600; letter-spacing: 0.3px;
+    transition: background 0.2s, opacity 0.2s;
+  }
+  .btn-siguiente:disabled { background: #aaa; cursor: not-allowed; opacity: 0.5; }
+  .btn-siguiente:not(:disabled):hover { background: var(--verde-oscuro); }
+
+  /* RESULTADO QUIZ */
+  .resultado-card { background: white; border-radius: 12px; padding: 30px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  .resultado-numero { font-size: 3.5rem; font-weight: bold; margin: 14px 0; }
+  .resultado-detalle { margin: 16px 0; text-align: left; }
+  .resultado-detalle h4 { color: var(--verde); margin-bottom: 8px; }
+  .fallos-list { list-style: none; }
+  .fallos-list li { padding: 7px 10px; background: var(--rojo-suave); border-radius: 6px; margin-bottom: 5px; font-size: 0.85rem; color: #5a1a1a; border-left: 3px solid var(--rojo); }
+  .resultado-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  .btn-accion { padding: 11px 22px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+  .btn-accion.primario { background: var(--verde); color: white; }
+  .btn-accion.primario:hover { background: var(--verde-oscuro); }
+  .btn-accion.secundario { background: var(--gris); color: var(--texto); border: 1px solid var(--borde); }
+  .btn-accion.secundario:hover { background: var(--verde-suave); }
+
+  /* SELECTOR QUIZ */
+  .selector-tema-quiz { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .selector-tema-quiz button { padding: 8px 16px; border-radius: 20px; border: 2px solid var(--borde); background: white; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+  .selector-tema-quiz button.sel { background: var(--verde); color: white; border-color: var(--verde); }
+  .selector-tema-quiz button:hover { border-color: var(--verde); }
+
+  /* FLASHCARDS */
+  .flash-controles { display: flex; gap: 10px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+  .flash-controles select { padding: 8px 12px; border: 1px solid var(--borde); border-radius: 8px; font-size: 0.88rem; background: white; }
+  .flash-contador { margin-left: auto; color: #666; font-size: 0.88rem; }
+  .tarjeta-container { perspective: 1000px; margin-bottom: 14px; }
+  .tarjeta { width: 100%; min-height: 210px; position: relative; transform-style: preserve-3d; transition: transform 0.5s; cursor: pointer; }
+  .tarjeta.volteada { transform: rotateY(180deg); }
+  .tarjeta-frente, .tarjeta-dorso {
+    position: absolute; width: 100%; min-height: 210px; backface-visibility: hidden;
+    border-radius: 14px; padding: 28px 24px; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .tarjeta-frente { background: linear-gradient(135deg, var(--verde), var(--verde-medio)); color: white; }
+  .tarjeta-dorso { background: white; transform: rotateY(180deg); color: var(--texto); border: 2px solid var(--borde); }
+  .tarjeta-frente .hint { font-size: 0.78rem; opacity: 0.7; margin-top: 14px; }
+  .tarjeta-frente h3 { font-size: 1.15rem; line-height: 1.5; }
+  .tarjeta-dorso p { font-size: 0.95rem; line-height: 1.65; }
+  .tarjeta-tema { font-size: 0.72rem; opacity: 0.75; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .flash-nav { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
+  .flash-nav button { padding: 9px 20px; border-radius: 8px; border: 1px solid var(--borde); background: white; cursor: pointer; font-size: 0.9rem; }
+  .flash-nav button:hover { background: var(--verde-suave); }
+  .flash-nav .btn-voltear { background: var(--verde); color: white; border-color: var(--verde); }
+
+  /* EVALUACIÓN FLASH */
+  .flash-eval {
+    display: none;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .flash-eval.visible { display: flex; }
+  .btn-sabia {
+    padding: 12px 28px; border-radius: 10px; border: none;
+    background: var(--verde); color: white; font-size: 1rem;
+    font-weight: 600; cursor: pointer; transition: all 0.15s;
+    box-shadow: 0 3px 8px rgba(45,125,58,0.3);
+  }
+  .btn-sabia:hover { background: var(--verde-oscuro); transform: translateY(-1px); }
+  .btn-no-sabia {
+    padding: 12px 28px; border-radius: 10px; border: none;
+    background: var(--rojo); color: white; font-size: 1rem;
+    font-weight: 600; cursor: pointer; transition: all 0.15s;
+    box-shadow: 0 3px 8px rgba(198,40,40,0.3);
+  }
+  .btn-no-sabia:hover { background: #b71c1c; transform: translateY(-1px); }
+  .flash-hint-eval { text-align:center; font-size:0.8rem; color:#888; margin-top:6px; }
+
+  /* PROGRESO FLASH */
+  .flash-barra-wrap { margin-bottom: 10px; }
+  .flash-barra-dual {
+    height: 8px; border-radius: 4px; background: var(--borde);
+    display: flex; overflow: hidden; margin-bottom: 4px;
+  }
+  .flash-barra-s { background: var(--verde); transition: width 0.4s; }
+  .flash-barra-n { background: var(--rojo); transition: width 0.4s; }
+  .flash-barra-labels { display:flex; justify-content:space-between; font-size:0.78rem; color:#666; }
+
+  /* RESUMEN FLASH */
+  .flash-resumen {
+    display: none;
+    background: white; border-radius: 12px; padding: 28px;
+    text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border: 1px solid var(--borde);
+  }
+  .flash-resumen.visible { display: block; }
+  .flash-resumen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+  .flash-res-box { border-radius: 10px; padding: 18px; }
+  .flash-res-box.ok { background: var(--verde-claro); border: 1px solid var(--verde-suave); }
+  .flash-res-box.mal { background: var(--rojo-suave); border: 1px solid #ffcdd2; }
+  .flash-res-box .num { font-size: 2.5rem; font-weight: 700; }
+  .flash-res-box.ok .num { color: var(--verde); }
+  .flash-res-box.mal .num { color: var(--rojo); }
+  .flash-res-box .lbl { font-size: 0.85rem; margin-top: 4px; color: #555; }
+  .flash-no-sabia-lista { text-align:left; margin-top:16px; }
+  .flash-no-sabia-lista h4 { color: var(--rojo); margin-bottom: 8px; font-size:0.9rem; }
+  .flash-no-sabia-item { font-size:0.83rem; padding:6px 10px; background:var(--rojo-suave); border-left:3px solid var(--rojo); border-radius:5px; margin-bottom:5px; color:#5a1a1a; }
+
+  /* CALCULADORA */
+  .calc-card { background: white; border-radius: 12px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 16px; border: 1px solid var(--borde); }
+  .calc-card h3 { color: var(--verde); margin-bottom: 14px; font-size: 1rem; }
+  .tramo-row { display: grid; grid-template-columns: 75px 90px 110px 100px 1fr 60px 30px; gap: 6px; align-items: center; margin-bottom: 8px; font-size: 0.85rem; background: var(--verde-claro); padding: 9px; border-radius: 8px; border: 1px solid var(--borde); }
+  .tramo-row input { padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; width: 100%; font-size: 0.84rem; }
+  .tramo-row .resultado-diam { font-weight: bold; color: var(--verde); text-align: center; font-size: 0.95rem; }
+  .tramo-etiquetas { display: grid; grid-template-columns: 75px 90px 110px 100px 1fr 60px 30px; gap: 6px; margin-bottom: 4px; font-size: 0.74rem; color: #666; padding: 0 9px; font-weight: 600; }
+  .btn-calc { background: var(--verde); color: white; border: none; padding: 11px 22px; border-radius: 8px; font-size: 0.92rem; cursor: pointer; margin-top: 4px; }
+  .btn-calc:hover { background: var(--verde-oscuro); }
+  .btn-add-tramo { background: white; color: var(--verde); border: 1px dashed var(--verde); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin-bottom: 10px; }
+  .btn-remove { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1.1rem; padding: 0; }
+  .btn-remove:hover { color: var(--rojo); }
+  .info-box { background: #fffde7; border-left: 4px solid var(--naranja); padding: 12px 14px; border-radius: 6px; font-size: 0.85rem; line-height: 1.6; margin-top: 10px; color: #4a3500; }
+  .resultado-tabla { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+  .resultado-tabla th { background: var(--verde); color: white; padding: 8px 10px; text-align: left; font-weight: 600; }
+  .resultado-tabla td { padding: 8px 10px; border-bottom: 1px solid var(--borde); }
+  .resultado-tabla tr:nth-child(even) td { background: var(--verde-claro); }
+  .diam-result { font-weight: bold; color: var(--verde); }
+
+  /* RESUMEN */
+  .resumen-card { background: white; border-radius: 12px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 16px; border: 1px solid var(--borde); }
+  .resumen-card h2 { color: var(--verde); margin-bottom: 16px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
+  .resumen-empty { text-align: center; padding: 32px; color: #888; }
+  .resumen-empty .big-icon { font-size: 3rem; margin-bottom: 10px; }
+  .estadisticas-globales { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 18px; }
+  .stat-box { background: var(--verde-claro); border-radius: 10px; padding: 14px; text-align: center; border: 1px solid var(--verde-suave); }
+  .stat-box .numero { font-size: 2rem; font-weight: 700; color: var(--verde); }
+  .stat-box .etiqueta { font-size: 0.78rem; color: #555; margin-top: 2px; }
+
+  /* ACORDEÓN RESUMEN */
+  .acord { border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--borde); overflow: hidden; }
+  .acord-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px; cursor: pointer; background: white;
+    transition: background 0.15s; user-select: none;
+  }
+  .acord-header:hover { background: var(--verde-claro); }
+  .acord-header.abierto { background: var(--verde-claro); border-bottom: 1px solid var(--borde); }
+  .acord-titulo { font-weight: 600; font-size: 0.95rem; flex: 1; }
+  .acord-meta { font-size: 0.8rem; color: #666; }
+  .acord-chevron { font-size: 0.75rem; transition: transform 0.25s; color: #888; }
+  .acord-header.abierto .acord-chevron { transform: rotate(180deg); }
+  .acord-barra { height: 5px; background: var(--borde); }
+  .acord-barra-fill { height: 100%; border-radius: 0; transition: width 0.5s; }
+  .nivel-bajo .acord-barra-fill { background: var(--rojo); }
+  .nivel-medio .acord-barra-fill { background: var(--naranja); }
+  .nivel-alto .acord-barra-fill { background: var(--verde); }
+  .acord-body { display: none; padding: 14px 16px; background: white; }
+  .acord-body.abierto { display: block; }
+  .fallada-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 8px 10px; background: var(--rojo-suave);
+    border-radius: 7px; margin-bottom: 6px;
+    border-left: 3px solid var(--rojo); cursor: pointer;
+    font-size: 0.84rem; color: #5a1a1a; transition: background 0.15s;
+  }
+  .fallada-item:hover { background: #ffcdd2; }
+  .fallada-item .fi-icon { font-size: 1rem; flex-shrink: 0; }
+  .fallada-item .fi-count { font-size: 0.75rem; background: var(--rojo); color: white; border-radius: 10px; padding: 1px 7px; flex-shrink: 0; margin-left: auto; }
+  .ok-item { padding: 8px 10px; background: var(--verde-claro); border-radius: 7px; font-size: 0.85rem; color: var(--verde); border-left: 3px solid var(--verde); }
+
+  /* REFUERZO - MÓDULOS DE ENSEÑANZA */
+  .refuerzo-info { background: #fff8e1; border-left: 4px solid var(--naranja); padding: 12px 14px; border-radius: 8px; font-size: 0.88rem; margin-bottom: 14px; color: #4a3000; }
+  .chip-tema { display: inline-block; padding: 4px 12px; border-radius: 14px; font-size: 0.78rem; font-weight: 600; margin: 3px; }
+  .chip-malo { background: var(--rojo-suave); color: #7a1a1a; border: 1px solid #ffcdd2; }
+  .chip-ok { background: var(--verde-claro); color: #1a4f22; border: 1px solid var(--verde-suave); }
+
+  .modulo-card {
+    background: white; border-radius: 12px; padding: 20px;
+    margin-bottom: 14px; border: 1px solid var(--borde);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .modulo-card h3 { font-size: 1rem; color: var(--verde-oscuro); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .modulo-steps { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .step-pill {
+    padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+    border: 2px solid var(--borde); background: white; color: #888;
+  }
+  .step-pill.activo { background: var(--naranja); color: white; border-color: var(--naranja); }
+  .step-pill.hecho { background: var(--verde); color: white; border-color: var(--verde); }
+
+  /* Lección */
+  .leccion-slide {
+    background: linear-gradient(135deg, #f0faf1, #e8f5e9);
+    border: 1px solid var(--verde-suave); border-radius: 10px;
+    padding: 18px; margin-bottom: 12px;
+  }
+  .leccion-slide .ls-titulo { font-weight: 700; color: var(--verde-oscuro); margin-bottom: 10px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
+  .leccion-slide .ls-cuerpo { font-size: 0.9rem; line-height: 1.7; color: #2a3a2b; }
+  .leccion-slide .ls-cuerpo strong { color: var(--verde-oscuro); }
+  .ls-dato {
+    display: flex; align-items: flex-start; gap: 8px;
+    background: white; border-radius: 7px; padding: 8px 10px;
+    margin-top: 8px; border-left: 3px solid var(--verde-accent);
+    font-size: 0.86rem; color: #1b3a1c;
+  }
+  .ls-tip {
+    background: #fff8e1; border-left: 3px solid var(--naranja);
+    border-radius: 7px; padding: 8px 12px; margin-top: 10px;
+    font-size: 0.84rem; color: #4a3000;
+  }
+  .leccion-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 8px; }
+  .leccion-contador { font-size: 0.82rem; color: #888; }
+  .btn-leccion { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+  .btn-leccion.siguiente { background: var(--verde); color: white; }
+  .btn-leccion.siguiente:hover { background: var(--verde-oscuro); }
+  .btn-leccion.practicar { background: var(--naranja); color: white; }
+  .btn-leccion.practicar:hover { background: #e65100; }
+
+  /* BTN RESUMEN FLOTANTE */
+  .fab {
+    position: fixed; bottom: 20px; right: 20px;
+    background: var(--verde);
+    color: white; border: none; border-radius: 50px;
+    padding: 13px 20px; font-size: 0.9rem; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(45,125,58,0.4);
+    z-index: 100;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .fab:hover { background: var(--verde-oscuro); transform: translateY(-2px); }
+
+  @media (max-width: 600px) {
+    /* Header */
+    .header-tree { font-size: 2rem; }
+    .header-titles h1 { font-size: 1.15rem; }
+    .header-badges { gap: 5px; }
+    .badge-stat { font-size: 0.72rem; padding: 3px 9px; }
+
+    /* Nav */
+    nav button { padding: 9px 12px; font-size: 0.8rem; }
+
+    /* Main */
+    main { padding: 12px 10px; }
+
+    /* Cards */
+    .card, .calc-card, .resumen-card, .pregunta-card { padding: 14px; }
+
+    /* Inicio grid */
+    .inicio-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .tema-card { padding: 14px 10px; }
+    .tema-card .icon { font-size: 1.8rem; }
+    .tema-card h3 { font-size: 0.82rem; }
+    .tema-card .qty { font-size: 0.72rem; }
+
+    /* Quiz */
+    .pregunta-card h2 { font-size: 0.95rem; }
+    .opcion { padding: 11px 12px; font-size: 0.88rem; }
+    .quiz-tema-badge { font-size: 0.75rem; padding: 3px 10px; }
+
+    /* Resultado */
+    .resultado-btns { flex-direction: column; }
+    .btn-accion { width: 100%; }
+    .estadisticas-globales { grid-template-columns: repeat(2, 1fr); }
+
+    /* Flashcards */
+    .flash-controles { gap: 6px; }
+    .tarjeta-frente, .tarjeta-dorso { padding: 20px 16px; min-height: 190px; }
+    .tarjeta-frente h3 { font-size: 1rem; }
+    .tarjeta-dorso p { font-size: 0.88rem; }
+    .flash-nav button { padding: 9px 14px; font-size: 0.85rem; }
+    .btn-sabia, .btn-no-sabia { padding: 11px 18px; font-size: 0.9rem; }
+    .flash-resumen-grid { grid-template-columns: 1fr 1fr; }
+    .flash-res-box .num { font-size: 2rem; }
+
+    /* Calculadora */
+    .tramo-etiquetas { display: none; }
+    .tramo-row {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 6px;
+    }
+    .tramo-row input { font-size: 0.82rem; }
+
+    /* FAB */
+    .fab { bottom: 14px; right: 14px; padding: 11px 16px; font-size: 0.82rem; }
+
+    /* Selector quiz */
+    .selector-tema-quiz button { padding: 7px 12px; font-size: 0.82rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tree">🌳</div>
+  <div class="header-titles">
+    <h1>IngeAPP</h1>
+    <p>App de repaso · Curso Gasista</p>
+  </div>
+  <div class="header-badges">
+    <div class="badge-stat" onclick="mostrarPantalla('resumen')" id="badge-aciertos">✅ 0 aciertos</div>
+    <div class="badge-stat" onclick="mostrarPantalla('resumen')" id="badge-errores">❌ 0 errores</div>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="mostrarPantalla('inicio')">🌿 Inicio</button>
+  <button onclick="mostrarPantalla('quiz')">📝 Quiz</button>
+  <button onclick="mostrarPantalla('flash')">🃏 Flashcards</button>
+  <button onclick="mostrarPantalla('calc')">🧮 Calculadora</button>
+  <button onclick="mostrarPantalla('resumen')">📊 Resumen</button>
+  <button onclick="mostrarPantalla('refuerzo')">🎯 Refuerzo</button>
+</nav>
+
+<main>
+
+<!-- INICIO -->
+<div id="pantalla-inicio" class="screen active">
+  <div class="card" style="border-left: 4px solid var(--verde)">
+    <h2>¡Bienvenida a IngeAPP! 🌳</h2>
+    <p style="color:#444;line-height:1.6">Repasá cada tema del curso de Gasista. IngeAPP registra tus errores y genera un plan de refuerzo personalizado para que llegues segura a cada evaluación.</p>
+  </div>
+  <div class="inicio-grid" id="inicio-grid"></div>
+  <div class="card" style="margin-top:14px">
+    <h3>Accesos directos</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn-accion primario" onclick="mostrarPantalla('resumen')">📊 Ver mi resumen</button>
+      <button class="btn-accion primario" onclick="mostrarPantalla('refuerzo')">🎯 Modo refuerzo</button>
+      <button class="btn-accion secundario" onclick="resetearProgreso()" style="margin-left:auto">🗑️ Reiniciar progreso</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="pantalla-quiz" class="screen">
+  <div id="quiz-selector" class="card">
+    <h2>Seleccioná el tema</h2>
+    <div class="selector-tema-quiz" id="botones-tema-quiz"></div>
+    <button class="btn-calc" onclick="iniciarQuizSeleccionado()" style="margin-top:6px">Comenzar ▶</button>
+  </div>
+  <div id="quiz-activo" style="display:none">
+    <div class="quiz-header">
+      <span class="quiz-tema-badge" id="quiz-tema-label"></span>
+      <span class="quiz-progreso" id="quiz-progreso"></span>
+    </div>
+    <div class="barra-progreso"><div class="barra-fill" id="barra-fill"></div></div>
+    <div class="pregunta-card">
+      <h2 id="pregunta-texto"></h2>
+      <div class="opciones" id="opciones-container"></div>
+      <div class="feedback-box" id="feedback-box" style="margin-top:14px"></div>
+      <button class="btn-siguiente" id="btn-siguiente" onclick="siguientePregunta()" disabled>Responde para continuar →</button>
+    </div>
+  </div>
+  <div id="quiz-resultado" style="display:none">
+    <div class="resultado-card">
+      <div style="font-size:2.8rem" id="resultado-emoji"></div>
+      <div class="resultado-numero" id="resultado-puntaje"></div>
+      <p style="color:#555;margin-bottom:16px" id="resultado-msg"></p>
+      <div class="resultado-detalle" id="resultado-fallos-container"></div>
+      <div class="resultado-btns">
+        <button class="btn-accion primario" onclick="reiniciarQuiz()">🔄 Repetir tema</button>
+        <button class="btn-accion primario" onclick="mostrarPantalla('refuerzo')">🎯 Ir a Refuerzo</button>
+        <button class="btn-accion secundario" onclick="mostrarPantalla('quiz')">← Otro tema</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLASHCARDS -->
+<div id="pantalla-flash" class="screen">
+  <div class="flash-controles">
+    <label style="font-weight:600;color:var(--verde)">Tema:</label>
+    <select id="flash-tema-select" onchange="cargarFlashcards()">
+      <option value="todos">Todos los temas</option>
+      <option value="gases">Gases Combustibles</option>
+      <option value="nociones">Nociones Físicas</option>
+      <option value="reguladores">Reguladores y Medidores</option>
+      <option value="herramientas">Herramental</option>
+      <option value="civil">Construcción Civil</option>
+    </select>
+    <button onclick="mezclarFlash()" style="padding:7px 13px;border-radius:8px;border:1px solid var(--borde);background:white;cursor:pointer">🔀 Mezclar</button>
+    <span class="flash-contador" id="flash-contador"></span>
+  </div>
+
+  <!-- Barra de progreso dual -->
+  <div class="flash-barra-wrap">
+    <div class="flash-barra-dual">
+      <div class="flash-barra-s" id="flash-barra-s" style="width:0%"></div>
+      <div class="flash-barra-n" id="flash-barra-n" style="width:0%"></div>
+    </div>
+    <div class="flash-barra-labels">
+      <span id="flash-label-s" style="color:var(--verde)">✅ 0 sabía</span>
+      <span id="flash-label-n" style="color:var(--rojo)">❌ 0 no sabía</span>
+    </div>
+  </div>
+
+  <!-- Tarjeta -->
+  <div id="flash-deck">
+    <div class="tarjeta-container">
+      <div class="tarjeta" id="tarjeta" onclick="voltearTarjeta()">
+        <div class="tarjeta-frente">
+          <div class="tarjeta-tema" id="flash-tema-badge"></div>
+          <h3 id="flash-pregunta"></h3>
+          <div class="hint">Tocá para ver la respuesta</div>
+        </div>
+        <div class="tarjeta-dorso">
+          <div class="tarjeta-tema" id="flash-tema-badge-dorso" style="color:#999"></div>
+          <p id="flash-respuesta"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones voltear / navegar (antes de voltear) -->
+    <div class="flash-nav" id="flash-nav-voltear">
+      <button onclick="flashAnterior()">← Anterior</button>
+      <button class="btn-voltear" onclick="voltearTarjeta()">↕ Ver respuesta</button>
+      <button onclick="flashSiguienteAuto()">Saltar →</button>
+    </div>
+
+    <!-- Botones de autoevaluación (aparecen tras voltear) -->
+    <div class="flash-eval" id="flash-eval-btns">
+      <button class="btn-no-sabia" onclick="evaluarFlash(false)">❌ No lo sabía</button>
+      <button class="btn-sabia" onclick="evaluarFlash(true)">✅ Lo sabía</button>
+    </div>
+    <div class="flash-hint-eval" id="flash-hint-eval" style="display:none">Evaluate honestamente — esto solo lo ve esta app 😉</div>
+  </div>
+
+  <!-- Resumen final -->
+  <div class="flash-resumen" id="flash-resumen">
+    <div style="font-size:2.5rem" id="flash-res-emoji">🎯</div>
+    <h2 style="color:var(--verde);margin:10px 0 4px">Ronda completada</h2>
+    <p style="color:#666;font-size:0.9rem" id="flash-res-subtitulo"></p>
+    <div class="flash-resumen-grid">
+      <div class="flash-res-box ok">
+        <div class="num" id="flash-res-sabia">0</div>
+        <div class="lbl">✅ Las sabía</div>
+      </div>
+      <div class="flash-res-box mal">
+        <div class="num" id="flash-res-no-sabia">0</div>
+        <div class="lbl">❌ No las sabía</div>
+      </div>
+    </div>
+    <div class="flash-no-sabia-lista" id="flash-no-sabia-lista"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+      <button class="btn-sabia" onclick="repetirNoSabidas()" id="btn-repetir-no-sabidas">🔁 Repasar las que no sabía</button>
+      <button class="btn-accion secundario" onclick="cargarFlashcards()">↺ Repetir todo</button>
+      <button class="btn-accion secundario" onclick="mostrarPantalla('refuerzo')">🎯 Ir a Refuerzo</button>
+    </div>
+  </div>
+</div>
+
+<!-- CALCULADORA -->
+<div id="pantalla-calc" class="screen">
+  <div class="calc-card">
+    <h3>🧮 Calculadora de Cañería Interna — Gas Natural</h3>
+    <div class="info-box">
+      <strong>Método Poole:</strong> Caída de presión máxima: <strong>10 mm CA</strong> · Poder calorífico GN referencia: <strong>9.300 Kcal/m³</strong> · Presión entrega regulador: <strong>180 mm CA</strong>
+    </div>
+  </div>
+  <div class="calc-card">
+    <h3>Tramos de la instalación</h3>
+    <p style="font-size:0.82rem;color:#666;margin-bottom:10px">Completá los datos de cada tramo. Los tramos de artefactos llevan número (1-A), los troncales letra (A-B, B-M).</p>
+    <div class="tramo-etiquetas">
+      <span>Tramo</span><span>L.Real (m)</span><span>Potencia (Kcal/h)</span><span>L.Cálculo (m)</span>
+      <span>🔑Llaves / ↪Codos / ⊥Te→ / ⊣Te↑</span><span>Diám.</span><span></span>
+    </div>
+    <div id="tramos-container"></div>
+    <button class="btn-add-tramo" onclick="agregarTramo()">+ Agregar tramo</button><br>
+    <button class="btn-calc" onclick="calcularCanieria()">Calcular diámetros ▶</button>
+  </div>
+  <div class="calc-card" id="resultado-calc" style="display:none">
+    <h3>Resultado</h3>
+    <div style="overflow-x:auto"><table class="resultado-tabla" id="tabla-resultado"></table></div>
+    <div class="info-box" style="margin-top:12px" id="calc-notas"></div>
+  </div>
+  <div class="calc-card">
+    <h3>📋 Referencia rápida — Tabla Poole simplificada</h3>
+    <p style="font-size:0.82rem;color:#666;margin-bottom:10px">Gas Natural · densidad 0,60-0,65 · h=10mm CA · Material Acero Epoxi / Sigas</p>
+    <div style="overflow-x:auto">
+    <table class="resultado-tabla">
+      <thead><tr><th>Diám. (mm)</th><th>L. cálculo hasta (m)</th><th>Caudal máx. (m³/h)</th></tr></thead>
+      <tbody>
+        <tr><td>13</td><td>10</td><td>0,78</td></tr>
+        <tr><td>13</td><td>20</td><td>0,55</td></tr>
+        <tr><td>13</td><td>30</td><td>0,45</td></tr>
+        <tr><td>19</td><td>10</td><td>2,10</td></tr>
+        <tr><td>19</td><td>20</td><td>1,48</td></tr>
+        <tr><td>19</td><td>30</td><td>1,21</td></tr>
+        <tr><td>19</td><td>40</td><td>1,05</td></tr>
+        <tr><td>25</td><td>20</td><td>3,60</td></tr>
+        <tr><td>25</td><td>30</td><td>2,94</td></tr>
+        <tr><td>25</td><td>40</td><td>2,55</td></tr>
+        <tr><td>32</td><td>30</td><td>5,80</td></tr>
+        <tr><td>32</td><td>50</td><td>4,50</td></tr>
+        <tr><td>38</td><td>50</td><td>7,20</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="info-box" style="margin-top:10px">
+      <strong>Longitud equivalente de accesorios (× diámetro del caño):</strong><br>
+      🔑 Llave de paso: ×100 &nbsp;·&nbsp; ↪ Codo 90°: ×30 &nbsp;·&nbsp; ⊥ Te a través: ×20 &nbsp;·&nbsp; ⊣ Te a 90°: ×60
+    </div>
+  </div>
+</div>
+
+<!-- RESUMEN -->
+<div id="pantalla-resumen" class="screen">
+  <div class="resumen-card">
+    <h2>📊 Mi resumen de progreso</h2>
+    <div id="estadisticas-globales" class="estadisticas-globales"></div>
+    <div id="resumen-contenido"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-accion primario" onclick="mostrarPantalla('refuerzo')">🎯 Ir a Módulos de Refuerzo</button>
+      <button class="btn-accion secundario" onclick="resetearProgreso()">🗑️ Reiniciar progreso</button>
+    </div>
+  </div>
+</div>
+
+<!-- REFUERZO -->
+<div id="pantalla-refuerzo" class="screen">
+
+  <!-- Sin datos -->
+  <div id="refuerzo-sin-datos" class="card" style="display:none">
+    <div class="resumen-empty">
+      <div class="big-icon">🌟</div>
+      <p>¡Todavía no hay errores registrados!<br>Hacé algunos quizzes primero y volvé acá.</p>
+      <button class="btn-accion primario" style="margin-top:14px" onclick="mostrarPantalla('quiz')">📝 Ir al Quiz</button>
+    </div>
+  </div>
+
+  <!-- Panel de módulos disponibles -->
+  <div id="refuerzo-modulos-lista" style="display:none">
+    <div class="card" style="margin-bottom:14px">
+      <h2 style="color:var(--verde);margin-bottom:6px">🎯 Módulos de Refuerzo</h2>
+      <p style="font-size:0.88rem;color:#555">Cada módulo primero te enseña el concepto y después te hace practicarlo. Empezá por los temas con más errores.</p>
+    </div>
+    <div id="modulos-grid"></div>
+  </div>
+
+  <!-- Módulo activo: LECCIÓN -->
+  <div id="refuerzo-leccion" style="display:none">
+    <div class="modulo-card">
+      <h3 id="leccion-titulo"></h3>
+      <div class="modulo-steps" id="leccion-steps"></div>
+      <div id="leccion-contenido"></div>
+      <div class="leccion-nav">
+        <span class="leccion-contador" id="leccion-contador"></span>
+        <div style="display:flex;gap:8px">
+          <button class="btn-leccion siguiente" id="leccion-btn-ant" onclick="leccionAnterior()" style="background:var(--gris);color:var(--texto)">← Anterior</button>
+          <button class="btn-leccion siguiente" id="leccion-btn-sig" onclick="leccionSiguiente()">Siguiente →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Módulo activo: PRÁCTICA -->
+  <div id="refuerzo-practica" style="display:none">
+    <div class="modulo-card">
+      <h3 id="practica-titulo"></h3>
+      <div class="modulo-steps" id="practica-steps"></div>
+    </div>
+    <div class="quiz-header" style="margin-top:4px">
+      <span class="quiz-tema-badge" style="background:var(--naranja)" id="practica-badge">🎯 Práctica</span>
+      <span class="quiz-progreso" id="refuerzo-progreso"></span>
+    </div>
+    <div class="barra-progreso"><div class="barra-fill" id="barra-fill-refuerzo" style="background:var(--naranja)"></div></div>
+    <div class="pregunta-card">
+      <h2 id="refuerzo-pregunta-texto"></h2>
+      <div class="opciones" id="refuerzo-opciones"></div>
+      <div class="feedback-box" id="refuerzo-feedback" style="margin-top:14px"></div>
+      <button class="btn-siguiente" id="refuerzo-btn-sig" onclick="refuerzoSiguiente()">Respondé para continuar →</button>
+    </div>
+  </div>
+
+  <!-- Resultado de práctica -->
+  <div id="refuerzo-resultado" style="display:none">
+    <div class="resultado-card">
+      <div style="font-size:2.5rem" id="refuerzo-res-emoji">🎯</div>
+      <div class="resultado-numero" id="refuerzo-puntaje"></div>
+      <p style="color:#555;margin-bottom:16px" id="refuerzo-msg"></p>
+      <div class="resultado-btns">
+        <button class="btn-accion primario" onclick="volverModulos()">← Otros módulos</button>
+        <button class="btn-accion primario" onclick="mostrarPantalla('resumen')">📊 Ver resumen</button>
+        <button class="btn-accion secundario" onclick="mostrarPantalla('inicio')">🌿 Inicio</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+
+<div class="fab" id="fab-resumen">
+  <span onclick="mostrarPantalla('resumen')" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+    📊 <span id="fab-errores-count">Ver resumen</span>
+  </span>
+  <span onclick="document.getElementById('fab-resumen').style.display='none'" style="cursor:pointer;opacity:0.7;font-size:1.1rem;padding-left:8px;border-left:1px solid rgba(255,255,255,0.4);margin-left:4px" title="Cerrar">✕</span>
+</div>
+
+<script>
+// =========================================
+// BANCO DE PREGUNTAS (con tema y id únicos)
+// =========================================
+const preguntas = [
+  // GASES
+  { id:'g1', tema:'gases', p:"¿Cuál es el principal componente del Gas Natural?", ops:["Propano (C3H8)","Butano (C4H10)","Metano (CH4) en un 95-98%","Hidrógeno"], r:2, exp:"El Gas Natural está compuesto principalmente por METANO en un 95 a 98%. El metano liberado a la atmósfera es aprox. 16 veces más contaminante que los gases de su combustión." },
+  { id:'g2', tema:'gases', p:"¿Cuál es el poder calorífico del Gas Grado 1 (Propano)?", ops:["9.300 Kcal/m³","13.000 Kcal/m³","22.380 Kcal/m³","27.482 Kcal/m³"], r:2, exp:"El Gas Grado 1 (Propano) tiene un poder calorífico de 22.380 Kcal/m³. El GN tiene ~9.300 Kcal/m³ y el Gas Grado 3 (Butano) tiene 27.482 Kcal/m³." },
+  { id:'g3', tema:'gases', p:"¿A qué temperatura pasa a estado líquido el Gas Grado 1 (Propano)?", ops:["-17°C","-44°C","0°C","-100°C"], r:1, exp:"El Gas Grado 1 (Propano, C3H8) está en estado líquido a -44°C. A temperaturas más altas solo se mantiene líquido si está comprimido." },
+  { id:'g4', tema:'gases', p:"¿Cuántos m³ de aire se necesitan para quemar 1 m³ de Gas Grado 1 (Propano)?", ops:["9 m³ de aire","17 m³ de aire","24 m³ de aire","30 m³ de aire"], r:2, exp:"Para la combustión de 1 m³ de Gas Grado 1 (Propano) se necesitan 24 m³ de aire. El Butano necesita 30 m³ de aire por m³ de gas." },
+  { id:'g5', tema:'gases', p:"¿Cuál es la presión de utilización del Gas Grado 1?", ops:["180 mmca","220 mmca","280 mmca","320 mmca"], r:2, exp:"El Gas Grado 1 (Propano) tiene una presión de utilización de 280 mmca. El Gas Grado 3 (Butano) tiene 320 mmca." },
+  { id:'g6', tema:'gases', p:"¿Cuál es la densidad del Gas Grado 3 (Butano)?", ops:["0,65","1,00","1,52","1,91"], r:3, exp:"El Gas Grado 3 (Butano, C4H10) tiene una densidad de 1,91. El Gas Grado 1 (Propano) tiene densidad 1,52. El Gas Natural tiene densidad 0,60-0,65." },
+  { id:'g7', tema:'gases', p:"¿Cuáles son los productos NO tóxicos de la combustión completa?", ops:["CO y nitrógeno","CO₂, vapor de agua y nitrógeno","Dióxido de azufre y CO₂","Metano y CO"], r:1, exp:"Los productos de combustión completa son CO₂, vapor de agua y nitrógeno, que NO son tóxicos. El CO (monóxido de carbono) SÍ es tóxico y aparece en combustión incompleta." },
+  { id:'g8', tema:'gases', p:"¿En qué envases se distribuye el Gas Grado 3 (Butano)?", ops:["Cilindros de 45 kg","Garrafas de 10 kg y 15 kg","Camiones cisterna","Garrafones de 0,5 m³"], r:1, exp:"El Gas Grado 3 (Butano) se distribuye en garrafas de 10 kg y 15 kg. El Propano (Grado 1) va en cilindros de 45 kg. El gas a granel usa tanques de 1 a 7,3 m³." },
+  { id:'g9', tema:'gases', p:"¿Cuál es el poder calorífico del Gas Natural del yacimiento de Plaza Huincul?", ops:["9.300 Kcal/m³","9.600 Kcal/m³","13.000 Kcal/m³","22.380 Kcal/m³"], r:1, exp:"Plaza Huincul: 9.600 Kcal/m³. Comodoro Rivadavia y Campo Durán: 9.300 Kcal/m³. Mendoza: 13.000 Kcal/m³ (el más alto)." },
+  { id:'g10', tema:'gases', p:"¿Qué es el Gas Natural Sintético (GNS)?", ops:["Gas natural de pozos profundos","Mezcla de propano/butano con aire para igualar el índice Wobbe del GN","Gas metano de residuos orgánicos","Butano licuado a alta presión"], r:1, exp:"El GNS se obtiene mezclando GLP (propano/butano) con aire en proporciones que igualan el índice Wobbe del Gas Natural, inyectándose en el sistema de distribución." },
+  { id:'g11', tema:'gases', p:"¿Qué representa el contenido de un cilindro de 45 kg de Gas Grado 1?", ops:["12 m³ y 268.560 Kcal","24 m³ y 537.120 Kcal","45 m³ y 418.500 Kcal","50 m³ y 1.000.000 Kcal"], r:1, exp:"Un cilindro de 45 kg de Propano = 24 m³ de gas y 537.120 Kcal (24 × 22.380 Kcal/m³)." },
+  { id:'g12', tema:'gases', p:"¿Qué es el Biogás?", ops:["Gas natural refinado","Gas generado por biodegradación de materia orgánica sin oxígeno (ambiente anaeróbico)","Propano industrial","Mezcla de GN y aire"], r:1, exp:"El biogás se genera por biodegradación de materia orgánica en ausencia de oxígeno (anaeróbico). Se obtiene de desperdicios orgánicos." },
+
+  // NOCIONES
+  { id:'n1', tema:'nociones', p:"¿Qué establece el SIMELA?", ops:["Normas de seguridad para gas","El sistema métrico legal argentino, de uso obligatorio y exclusivo","Sistema de medición de presiones","Normas de instalación de medidores"], r:1, exp:"El SIMELA (Sistema Métrico Legal Argentino) es el sistema de unidades vigente en Argentina, de uso obligatorio y exclusivo. Ley 19.511 de 1972." },
+  { id:'n2', tema:'nociones', p:"¿Cuál es la definición de Caloría (cal)?", ops:["Calor para elevar 1°C a 1 litro de agua","Calor para elevar 1°C a 1 gramo de agua (de 14,5 a 15,5°C)","Calor para elevar 10°C a 1 kg de agua","Calor producido por 1 m³ de gas en combustión"], r:1, exp:"La caloría es la cantidad de calor necesaria para elevar en 1°C (de 14,5 a 15,5°C) la temperatura de 1 gramo de agua. La kcal = 1.000 cal." },
+  { id:'n3', tema:'nociones', p:"¿A qué temperatura Kelvin corresponde la ebullición del agua?", ops:["0 K","100 K","273 K","373 K"], r:3, exp:"El agua hierve a 100°C = 373 K. Hielo funde a 0°C = 273 K. Cero absoluto: 0 K = -273°C." },
+  { id:'n4', tema:'nociones', p:"¿Cómo se calcula el Consumo en m³/h de un artefacto?", ops:["Potencia × Poder Calorífico","Potencia ÷ Poder Calorífico","Caudal × Presión","Temperatura ÷ Potencia"], r:1, exp:"Consumo (m³/h) = Potencia (Kcal/h) ÷ Poder Calorífico (Kcal/m³). Ej: 3.000 ÷ 9.300 = 0,32 m³/h." },
+  { id:'n5', tema:'nociones', p:"¿Cuál es el calor específico del agua?", ops:["0,5 kcal/kg·°C","1 kcal/kg·°C","4,18 kcal/kg·°C","9,3 kcal/kg·°C"], r:1, exp:"El calor específico del agua es 1 kcal/kg·°C. Se necesita 1 kcal para elevar 1 kg de agua en 1°C." },
+  { id:'n6', tema:'nociones', p:"¿Qué es la presión?", ops:["Velocidad de un fluido en tubería","Volumen de fluido por unidad de tiempo","Fuerza ejercida por unidad de superficie","Cantidad de calor de un combustible"], r:2, exp:"La presión es la fuerza ejercida por unidad de superficie (kg/cm²). Otras unidades: atmósfera, mmca, bar." },
+  { id:'n7', tema:'nociones', p:"¿Cuáles son las tres formas de transmisión del calor?", ops:["Ebullición, fusión y vaporización","Conducción, convección y radiación","Presión, temperatura y caudal","Combustión, oxidación y reducción"], r:1, exp:"Conducción (contacto), convección (movimiento de fluidos) y radiación (ondas electromagnéticas a 300.000 km/s)." },
+  { id:'n8', tema:'nociones', p:"¿Por qué los calefactores se colocan en la parte inferior de los ambientes?", ops:["Para facilitar el mantenimiento","Por norma reglamentaria","Para aprovechar la convección: el aire caliente sube y el frío baja","Porque el gas es más pesado que el aire"], r:2, exp:"Por convección: el calefactor calienta el aire cercano que se vuelve menos denso y sube. El frío baja. Se ubican entre 10 y 20 cm del piso." },
+  { id:'n9', tema:'nociones', p:"¿Qué es el Poder Calorífico de un combustible?", ops:["Velocidad de combustión del gas","Cantidad de calor entregado por unidad de combustible durante la combustión","Temperatura a la que se enciende el gas","Presión mínima para que ocurra la combustión"], r:1, exp:"El poder calorífico es la cantidad de calor entregado por una unidad de combustible durante la combustión. Se mide en Kcal/m³ para gases." },
+  { id:'n10', tema:'nociones', p:"¿Qué es el Caudal?", ops:["La presión del gas en la tubería","El diámetro necesario para la tubería","El volumen de fluido que circula por una tubería en la unidad de tiempo","La potencia térmica de un artefacto"], r:2, exp:"El Caudal es el volumen de fluido que circula dentro de una tubería en la unidad de tiempo (m³/h). Fundamental para dimensionar cañerías." },
+  { id:'n11', tema:'nociones', p:"La conversión de Celsius a Kelvin es:", ops:["K = °C + 100","K = °C − 273","K = °C + 273","K = (°C × 9/5) + 32"], r:2, exp:"K = °C + 273. Cero absoluto (0 K) = -273°C. La última fórmula es Celsius a Fahrenheit." },
+
+  // REGULADORES
+  { id:'r1', tema:'reguladores', p:"¿Cuál es la presión de salida normal de un regulador domiciliario?", ops:["0,5 bar","0,019 bar (≈ 190 mmca)","4 bar","1 kg/cm²"], r:1, exp:"La presión de salida del regulador es 0,019 bar (~190 mmca). La presión de entrada puede ser de 0,5 a 4 bar." },
+  { id:'r2', tema:'reguladores', p:"¿Dónde deben ubicarse los reguladores según la norma?", ops:["Dentro del medidor","En un nicho sobre la línea municipal","En el interior del inmueble","En el sótano o garage"], r:1, exp:"Los reguladores deben estar en un nicho sobre la línea municipal, con una llave de paso tipo candado que los precede." },
+  { id:'r3', tema:'reguladores', p:"¿Cuáles son las capacidades nominales de los reguladores?", ops:["1, 2, 5, 10, 20 m³/h","6, 10, 25, 40, 65, 100 m³/h","5, 15, 30, 60, 90 m³/h","10, 20, 50, 100, 200 m³/h"], r:1, exp:"Capacidades nominales: 6, 10, 25, 40, 65 y 100 m³/h." },
+  { id:'r4', tema:'reguladores', p:"¿Qué norma regula actualmente los reguladores de presión?", ops:["NAG 135","NAG 235-1995","NAG 235-2019","NAG 500"], r:2, exp:"La NAG 235-2019 reemplaza a la NAG 135 y NAG 235-1995. Establece requisitos mínimos de seguridad, fabricación y funcionamiento para reguladores nuevos." },
+  { id:'r5', tema:'reguladores', p:"¿Cuándo interrumpe el paso de gas un regulador?", ops:["Solo por exceso de caudal","Solo por caída de presión de entrada","Por caída anormal de Pe o Ps, exceso de caudal o rotura del diafragma","Solo cuando se rompe el diafragma"], r:2, exp:"El regulador interrumpe cuando: caída anormal de presión de entrada, de salida, exceso de caudal o rotura del diafragma." },
+  { id:'r6', tema:'reguladores', p:"¿Cómo se ajusta la presión en un regulador?", ops:["Apretando el tornillo (rosca derecha) sale más presión","Apretando el tornillo (rosca izquierda) sale más presión","Aflojando el tornillo sale más presión","La presión no es ajustable manualmente"], r:1, exp:"Los reguladores son positivos: apretando el tornillo (rosca izquierda) sale más presión." },
+  { id:'r7', tema:'reguladores', p:"¿Para qué tipo de consumo se usan los medidores de diafragma?", ops:["Grandes industrias con altos caudales","Solo para GLP","Bajas presiones, domiciliarios hasta 10 m³/h (fabricados hasta 40 m³/h)","Solo para Gas Grado 1"], r:2, exp:"Medidores de diafragma: bajas presiones, domiciliarios hasta 10 m³/h, fabricados hasta 40 m³/h." },
+  { id:'r8', tema:'reguladores', p:"¿Cuál es la ventaja principal de los medidores rotativos?", ops:["Son más baratos","Alta precisión (0,5%), bajo mantenimiento, altas presiones y grandes consumos","Solo para Gas Grado 3","Son más pequeños"], r:1, exp:"Medidores rotativos: precisión 0,5% estándar, bajo mantenimiento, altas presiones. Se usan para grandes consumos (MAC)." },
+  { id:'r9', tema:'reguladores', p:"¿Qué tipo de rosca se usa en conexiones de cañería de gas?", ops:["Rosca métrica paralela","Rosca Whitworth Gas (BSP - British Standard Pipe)","Rosca americana UNC","Rosca trapezoidal"], r:1, exp:"Se usa la rosca Whitworth Gas (BSP), con perfil Whitworth. Puede ser paralela o cónica; la cónica tiene inclinación de 1 mm por cada 16 mm de longitud." },
+
+  // HERRAMIENTAS
+  { id:'h1', tema:'herramientas', p:"¿Cuál es la diferencia entre la Llave Stillson y la Llave Inglesa?", ops:["Son lo mismo","La Stillson es para tubos (gran par), la Inglesa es para tuercas/tornillos","La Inglesa es fija","La Stillson solo se usa para gas"], r:1, exp:"Llave Stillson: para tubos (gran par de apriete), patentada en 1869. Llave Inglesa: ajustable, para tuercas y tornillos." },
+  { id:'h2', tema:'herramientas', p:"¿Cuál es el instrumento principal para detectar fugas de gas?", ops:["Manómetro","Columna de agua","Detector de gases","Termómetro"], r:2, exp:"El Detector de gases detecta fugas. También se usa detergente neutro en uniones. El manómetro y la columna de agua miden presión para pruebas de estanqueidad." },
+  { id:'h3', tema:'herramientas', p:"¿Para qué sirve la Terraja?", ops:["Medir diámetro de caños","Cortar caños","Hacer roscas en caños y tornillos","Doblar caños"], r:2, exp:"La Terraja (tarraja de roscar) es una herramienta de corte para el roscado manual de pernos y tornillos." },
+  { id:'h4', tema:'herramientas', p:"¿Qué es la Termofusora?", ops:["Medidor de temperatura del gas","Herramienta eléctrica para unir caños de polietileno por fusión","Equipo para detectar fugas","Instrumento para medir presión"], r:1, exp:"La Termofusora es una herramienta eléctrica para unir caños de polietileno (Sigas, Fusiogas, Vantec) por fusión térmica." },
+  { id:'h5', tema:'herramientas', p:"¿Con qué se sella la rosca en conexiones de gas?", ops:["Cinta de PVC","Silicona","Grasa grafitada o sella-roscas (pasta aprobada)","Pegamento epoxi"], r:2, exp:"Las conexiones se sellan con pastas aprobadas (sella-roscas) o grasa grafitada. Se verifica que no queden filetes expuestos fuera del accesorio." },
+  { id:'h6', tema:'herramientas', p:"¿Qué equipo de seguridad personal es obligatorio para el gasista?", ops:["Solo guantes de cuero","Guantes, antiparras, protectores auditivos y faja lumbar","Solo casco y botas","Solo mascarilla de gases"], r:1, exp:"Equipo de seguridad: guantes, antiparras, protectores auditivos, faja lumbar, cinta de peligro y botiquín de primeros auxilios." },
+  { id:'h7', tema:'herramientas', p:"¿Para qué se usa la Columna de Agua?", ops:["Almacenar agua en obras","Medir presiones bajas (mmca) en instalaciones de gas","Lavar piezas metálicas","Nivelar superficies"], r:1, exp:"La Columna de Agua mide presiones bajas en mmca. Verifica la presión de entrega del regulador (~180 mmca) y la caída de presión en la instalación (máx 10 mmca)." },
+  { id:'h8', tema:'herramientas', p:"¿Qué diferencia a la Llave Francesa de la Inglesa?", ops:["No tienen diferencias","La Francesa es en T con doble garganta (obsoleta), la Inglesa es más pequeña y liviana","La Francesa es para agua, la Inglesa para gas","La Francesa es más moderna"], r:1, exp:"La Llave Francesa es en forma de T con doble garganta, popular en el siglo XIX. Fue sustituida por la Llave Inglesa, más liviana y pequeña." },
+
+  // CIVIL
+  { id:'c1', tema:'civil', p:"¿Qué es la Nomenclatura Catastral?", ops:["Nombre de la distribuidora de gas","Identificador del Catastro para individualizar parcelas","Número de matrícula del gasista","Código de la instalación de gas"], r:1, exp:"La Nomenclatura Catastral identifica parcelas. Ej: 15-21-001-9999-0000 (Nº de lote, manzana, dirección)." },
+  { id:'c2', tema:'civil', p:"¿Cuál es la documentación para presentar en la distribuidora de gas?", ops:["Solo el plano de instalación","Certificado de domicilio y VEP","DNI y título habilitante únicamente","Solo el VEP"], r:1, exp:"Se necesita: Certificado de domicilio (constata el domicilio) y VEP (Verificación de Subsistencia del Estado Parcelario)." },
+  { id:'c3', tema:'civil', p:"¿Qué regla SIEMPRE debe respetarse con las cañerías de gas enterradas?", ops:["Pueden doblarse con herramienta correcta","Solo pueden curvarse con radio mínimo 1 metro","La cañería NO se puede curvar ni torsionar bajo ninguna circunstancia","Pueden curvarse hasta 45° sin problemas"], r:2, exp:"La cañería de gas no se puede curvar ni torsionar de ninguna manera. Las zanjas deben ser rectas; los cambios de dirección se hacen con codos (accesorios)." },
+  { id:'c4', tema:'civil', p:"¿Cómo deben almacenarse los caños con recubrimiento epoxi?", ops:["Se pueden arrastrar sobre el suelo","En lugares cerrados, separados del piso con material blando, sin golpearlos","Bajo el sol para curar el recubrimiento","Sumergidos en agua"], r:1, exp:"Los caños epoxi no se arrastran ni ruedan sobre el suelo. Se almacenan en lugares cerrados, separados del piso con material blando, alineados y sin golpes." },
+  { id:'c5', tema:'civil', p:"¿Qué es el Replanteo en construcción?", ops:["Proceso de fabricación de caños","Ubicación de puntos en el terreno según los planos, previo a la construcción","Verificación de presión al terminar la obra","Diseño del plano de instalación"], r:1, exp:"El Replanteo ubica en el terreno todos los puntos necesarios según los planos, como paso previo a la construcción. Para zanjas de gas se usan hilos guías sobre caballetes." },
+  { id:'c6', tema:'civil', p:"¿Qué es un Chaflán u Ochava?", ops:["Un tipo de accesorio de cañería","Recurso urbanístico que une con línea oblicua los lados de manzanas en esquinas","El espacio entre dos parcelas","Una herramienta para marcar el terreno"], r:1, exp:"El chaflán u ochava une con una línea oblicua los lados de manzanas en esquinas, mejorando la circulación y visibilidad." },
+  { id:'c7', tema:'civil', p:"¿Cuáles son los componentes del mortero?", ops:["Cemento, arena, grava y cal","Conglomerantes inorgánicos (cemento/cal), arena y agua","Solo cemento y agua","Arena, cal y yeso"], r:1, exp:"Morteros: mezcla de conglomerantes inorgánicos, áridos (arena), agua y posibles aditivos. El cemento se obtiene de calcinar a 1.450°C piedra caliza, arcilla y mineral de hierro." },
+  { id:'c8', tema:'civil', p:"¿Qué es la Línea Municipal?", ops:["La tubería principal de gas en la calle","Línea que deslinda la parcela de la vía pública, límite del área edificable en el frente","El eje que separa dos predios","El límite de la zona de excavación"], r:1, exp:"La Línea Municipal deslinda la parcela de la vía pública actual o futura, definiendo el área edificable en el frente de la parcela." },
+];
+
+// =========================================
+// FLASHCARDS
+// =========================================
+const flashcards = [
+  { id:'fl1',  tema:'gases', p:"Fórmula del Propano y características", r:"C₃H₈ (Gas Grado 1) · Líquido a -44°C · Presión utilización: 280 mmca · Poder calorífico: 22.380 Kcal/m³ · Densidad: 1,52 · Cilindros de 45 kg = 24 m³ gas" },
+  { id:'fl2',  tema:'gases', p:"Fórmula del Butano y características", r:"C₄H₁₀ (Gas Grado 3) · Líquido a -17°C · Presión utilización: 320 mmca · Poder calorífico: 27.482 Kcal/m³ · Densidad: 1,91 · Garrafas de 10 y 15 kg" },
+  { id:'fl3',  tema:'gases', p:"¿Qué es la Combustión?", r:"Combinación rápida de un combustible con oxígeno, con producción de calor y luz. Productos NO tóxicos: CO₂, vapor de agua y N₂. El CO (monóxido de carbono) SÍ es tóxico (combustión incompleta)." },
+  { id:'fl4',  tema:'gases', p:"Poder calorífico del Gas Natural por yacimiento", r:"Comodoro Rivadavia: 9.300 Kcal/m³ · Campo Durán: 9.300 Kcal/m³ · Plaza Huincul: 9.600 Kcal/m³ · Mendoza: 13.000 Kcal/m³ · Referencia de cálculo: 9.300 Kcal/m³" },
+  { id:'fl5',  tema:'gases', p:"¿Qué es el Gas Natural Sintético (GNS)?", r:"Mezcla de propano/butano con aire que iguala el índice Wobbe del Gas Natural. Proceso: vaporizador → mezclador → red de distribución. Puede incluir calómetro y compresor." },
+  { id:'fl6',  tema:'gases', p:"¿Qué es el Biogás?", r:"Gas combustible generado por biodegradación de materia orgánica en ambiente anaeróbico (sin oxígeno). Se obtiene de desperdicios orgánicos (residuos vegetales)." },
+  { id:'fl7',  tema:'nociones', p:"Conversión de escalas de temperatura", r:"°C a K: K = °C + 273 · °C a °F: °F = (°C × 9/5) + 32 · Referencias: agua hierve = 100°C = 373 K = 212°F · Cero absoluto = -273°C = 0 K" },
+  { id:'fl8',  tema:'nociones', p:"SIMELA y Ley que lo establece", r:"Sistema Métrico Legal Argentino · Uso obligatorio y exclusivo en Argentina · Establecido por Ley 19.511 de 1972 · Basado en el Sistema Internacional de Unidades (SI)" },
+  { id:'fl9',  tema:'nociones', p:"Fórmula de Consumo de un artefacto", r:"Consumo (m³/h) = Potencia (Kcal/h) ÷ Poder Calorífico (Kcal/m³) · Ejemplo: Calefactor 3.000 Kcal/h con GN → 3.000 ÷ 9.300 = 0,32 m³/h" },
+  { id:'fl10', tema:'nociones', p:"Tres formas de transmisión del calor", r:"1. CONDUCCIÓN: contacto entre sólidos · 2. CONVECCIÓN: movimiento de fluidos (calefactor abajo, frío arriba) · 3. RADIACIÓN: ondas electromagnéticas en el vacío, a 300.000 km/s" },
+  { id:'fl11', tema:'nociones', p:"Calor específico y unidades", r:"Calor Específico del agua = 1 kcal/kg·°C · 1 cal = calor para elevar 1g de agua en 1°C · 1 kcal = 1.000 cal = calor para elevar 1kg de agua en 1°C" },
+  { id:'fl12', tema:'nociones', p:"Presión y sus unidades", r:"Presión = Fuerza / Superficie · Unidades: kg/cm², atmósfera, mmca (milímetros de columna de agua), bar, Pa · Presión de distribución: varía por pérdidas de carga en el recorrido" },
+  { id:'fl13', tema:'reguladores', p:"Presiones del regulador domiciliario", r:"Entrada (Pe): 0,5 a 4 bar · Salida (Ps): 0,019 bar (~190 mmca) · Caída máxima en instalación: 10 mmca · Entrega al artefacto mínima: 170 mmca" },
+  { id:'fl14', tema:'reguladores', p:"NAG 235-2019 — alcance y qué reemplaza", r:"Reemplaza NAG 135 y NAG 235-1995 · Requisitos mínimos: seguridad, fabricación, funcionamiento y ensayos · Aplica a reguladores nuevos para GN y GLP · Incluye conexiones flexibles de entrada" },
+  { id:'fl15', tema:'reguladores', p:"Capacidades nominales de reguladores", r:"6 · 10 · 25 · 40 · 65 · 100 m³/h · Ubicación: nicho sobre línea municipal · Conexiones: en L (escuadra 90°) o en línea recta · Rosca positiva (izquierda): apretar = más presión" },
+  { id:'fl16', tema:'reguladores', p:"Medidor de diafragma vs. rotativo", r:"Diafragma: bajas presiones, domiciliario hasta 10 m³/h (fab. hasta 40), tiene juntas dieléctricas · Rotativo: grandes consumos (MAC), precisión 0,5%, presiones altas, 2 lóbulos rotativos" },
+  { id:'fl17', tema:'reguladores', p:"Rosca Whitworth Gas (BSP)", r:"British Standard Pipe Thread · Perfil Whitworth · Paralela o cónica · Inclinación cónica: 1 mm cada 16 mm de longitud · Uso: según norma en conexiones de caños y accesorios de gas" },
+  { id:'fl18', tema:'herramientas', p:"Llaves ajustables del gasista", r:"Stillson (llave de perro): tubos grandes, gran par de apriete, tamaños en pulgadas (8-48), patentada 1869 · Inglesa: tuercas y tornillos, cabeza móvil · Sueca: fontanería, anillo ajustable · Francesa: forma T, obsoleta" },
+  { id:'fl19', tema:'herramientas', p:"Sellado de roscas y materiales de unión", r:"Sella-roscas (pasta aprobada) o Grasa grafitada · También: cinta teflón · Verificar: no dejar filetes expuestos fuera del accesorio · Herramienta: terraja o roscadora eléctrica" },
+  { id:'fl20', tema:'herramientas', p:"Instrumentos de medición del gasista", r:"Columna de agua (presiones en mmca) · Manómetro (presiones) · Detector de gases (fugas) · Nivel de burbuja y manguera (nivelación) · Cinta métrica" },
+  { id:'fl21', tema:'herramientas', p:"Equipo de seguridad EPP del gasista", r:"Guantes · Antiparras · Protectores auditivos · Faja lumbar · Cinta de peligro · Botiquín de primeros auxilios · Calzado de seguridad" },
+  { id:'fl22', tema:'herramientas', p:"Termofusora — uso y aplicación", r:"Herramienta ELÉCTRICA para unir caños de Polietileno (PE) por fusión térmica · Materiales: Sigas, Fusiogas, Vantec · También: cortacaño y escariador para preparar el caño antes de fusionar" },
+  { id:'fl23', tema:'civil', p:"Documentación para presentación en distribuidora", r:"Certificado de domicilio: constata la veracidad del domicilio · VEP: Verificación de Subsistencia del Estado Parcelario · Nomenclatura Catastral: identifica la parcela (ej: 15-21-001-9999-0000)" },
+  { id:'fl24', tema:'civil', p:"Regla fundamental de cañerías de gas", r:"¡NUNCA curvar ni torsionar la cañería! Bajo ninguna circunstancia. Las zanjas deben ser rectas. Los cambios de dirección = codos (accesorios). Caballetes + hilos guías para el replanteo." },
+  { id:'fl25', tema:'civil', p:"Almacenamiento de caños Epoxi vs PE-Acero", r:"Epoxi: no arrastrar ni rodar · Lugares cerrados · Separados del piso con material blando · No golpear · Proteger puntas del agua · PE-Acero: condiciones similares, proteger de radiación UV" },
+  { id:'fl26', tema:'civil', p:"Términos urbanísticos clave", r:"Línea Municipal: límite parcela / vía pública · Eje medianero: separa dos predios · Chaflán/ochava: corte oblicuo en esquinas · Mojón: poste que marca límites de territorio · Replanteo: traspaso de plano al terreno" },
+  { id:'fl27', tema:'civil', p:"Materiales de construcción: Mortero y Cemento", r:"Mortero: conglomerante + arena + agua + aditivos · Cemento: calcinación a 1.450°C de piedra caliza + arcilla + mineral de hierro → clínker → se muele con yeso · Arena: agregado fino · Agua: hidrata el cemento" },
+];
+
+// =========================================
+// PROGRESO — localStorage con fallback en memoria
+// =========================================
+let _progresoMemoria = {};
+let _storageDisponible = false;
+
+(function detectarStorage() {
+  try {
+    localStorage.setItem('_test', '1');
+    localStorage.removeItem('_test');
+    _storageDisponible = true;
+    // Migrar datos previos si existen
+    const prev = localStorage.getItem('ingeapp_progreso');
+    if (prev) _progresoMemoria = JSON.parse(prev);
+  } catch(e) {
+    _storageDisponible = false;
+  }
+})();
+
+function cargarProgreso() {
+  if (_storageDisponible) {
+    try { return JSON.parse(localStorage.getItem('ingeapp_progreso') || '{}'); } catch { return _progresoMemoria; }
+  }
+  return _progresoMemoria;
+}
+function guardarProgreso(p) {
+  _progresoMemoria = p;
+  if (_storageDisponible) {
+    try { localStorage.setItem('ingeapp_progreso', JSON.stringify(p)); } catch(e) {}
+  }
+}
+function registrarRespuesta(idPregunta, temaPregunta, correcta, textoPregunta) {
+  try {
+    const prog = cargarProgreso();
+    if (!prog[idPregunta]) prog[idPregunta] = { tema: temaPregunta, texto: textoPregunta, intentos: 0, errores: 0 };
+    prog[idPregunta].intentos++;
+    if (!correcta) prog[idPregunta].errores++;
+    guardarProgreso(prog);
+    actualizarBadges();
+  } catch(e) { console.warn('Progreso no disponible:', e); }
+}
+function resetearProgreso() {
+  if (confirm('¿Seguro que querés reiniciar todo el progreso?')) {
+    _progresoMemoria = {};
+    if (_storageDisponible) { try { localStorage.removeItem('ingeapp_progreso'); } catch(e) {} }
+    actualizarBadges();
+    renderizarInicio();
+    alert('Progreso reiniciado 🌱');
+  }
+}
+
+// =========================================
+// BADGES & ESTADO GLOBAL
+// =========================================
+function actualizarBadges() {
+  const prog = cargarProgreso();
+  let totalAciertos = 0, totalErrores = 0;
+  Object.values(prog).forEach(v => {
+    totalAciertos += (v.intentos - v.errores);
+    totalErrores += v.errores;
+  });
+  document.getElementById('badge-aciertos').textContent = `✅ ${totalAciertos} aciertos`;
+  document.getElementById('badge-errores').textContent = `❌ ${totalErrores} errores`;
+  const fab = document.getElementById('fab-errores-count');
+  fab.textContent = totalErrores > 0 ? `${totalErrores} errores — Ver resumen` : 'Ver resumen';
+}
+
+// =========================================
+// TEMAS
+// =========================================
+const temasInfo = {
+  gases:       { label:'🔥 Gases Combustibles', icon:'🔥' },
+  nociones:    { label:'⚗️ Nociones Físicas',   icon:'⚗️' },
+  reguladores: { label:'⚙️ Reguladores',         icon:'⚙️' },
+  herramientas:{ label:'🔩 Herramental',          icon:'🔩' },
+  civil:       { label:'🏗️ Construcción Civil',  icon:'🏗️' },
+  todos:       { label:'🌐 Todos los temas',      icon:'🌐' },
+};
+
+// =========================================
+// HELPERS
+// =========================================
+function mezclar(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// =========================================
+// NAVEGACIÓN
+// =========================================
+function mostrarPantalla(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('pantalla-' + id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  const orden = ['inicio','quiz','flash','calc','resumen','refuerzo'];
+  const idx = orden.indexOf(id);
+  if (idx >= 0) document.querySelectorAll('nav button')[idx].classList.add('active');
+
+  if (id === 'quiz') inicializarSelectorQuiz();
+  if (id === 'flash') cargarFlashcards();
+  if (id === 'calc') inicializarCalc();
+  if (id === 'resumen') renderizarResumen();
+  if (id === 'refuerzo') inicializarRefuerzo();
+}
+
+// =========================================
+// INICIO
+// =========================================
+function renderizarInicio() {
+  const prog = cargarProgreso();
+  const temasData = [
+    { key:'gases',        h3:'Gases Combustibles',    qty:'GN · GLP · GNS · Biogás' },
+    { key:'nociones',     h3:'Nociones Físicas',      qty:'Calor · Presión · Caudal · Temperatura' },
+    { key:'reguladores',  h3:'Reguladores y Medidores',qty:'NAG 235 · Diafragma · Rotativo' },
+    { key:'herramientas', h3:'Herramental',            qty:'Herramientas del Gasista' },
+    { key:'civil',        h3:'Construcción Civil',     qty:'Terreno · Zanjas · Materiales' },
+    { key:'calc',         h3:'Cálculo de Cañería',     qty:'Calculadora Método Poole' },
+  ];
+  const grid = document.getElementById('inicio-grid');
+  grid.innerHTML = temasData.map(t => {
+    const errTema = Object.values(prog).filter(v => v.tema === t.key && v.errores > 0).length;
+    const badge = errTema > 0 ? `<div class="error-badge">${errTema}</div>` : '';
+    const icon = temasInfo[t.key]?.icon || '📘';
+    const onclick = t.key === 'calc' ? `mostrarPantalla('calc')` : `iniciarQuizTema('${t.key}')`;
+    return `<div class="tema-card" onclick="${onclick}">
+      ${badge}
+      <div class="icon">${icon}</div>
+      <h3>${t.h3}</h3>
+      <div class="qty">${t.qty}</div>
+    </div>`;
+  }).join('');
+}
+
+// =========================================
+// QUIZ
+// =========================================
+let quizEstado = { pool: [], indice: 0, aciertos: 0, tema: '', sesionFallos: [] };
+let temaQuizSeleccionado = 'todos';
+
+function inicializarSelectorQuiz() {
+  const cont = document.getElementById('botones-tema-quiz');
+  cont.innerHTML = Object.entries(temasInfo).map(([k,v]) =>
+    `<button class="${k===temaQuizSeleccionado?'sel':''}" onclick="selTemaQuiz('${k}',this)">${v.label}</button>`
+  ).join('');
+  document.getElementById('quiz-selector').style.display = '';
+  document.getElementById('quiz-activo').style.display = 'none';
+  document.getElementById('quiz-resultado').style.display = 'none';
+}
+
+function selTemaQuiz(tema, btn) {
+  temaQuizSeleccionado = tema;
+  document.querySelectorAll('.selector-tema-quiz button').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function iniciarQuizSeleccionado() { iniciarQuiz(temaQuizSeleccionado); }
+function iniciarQuizTema(tema) {
+  temaQuizSeleccionado = tema;
+  mostrarPantalla('quiz');
+  setTimeout(() => iniciarQuiz(tema), 50);
+}
+
+function iniciarQuiz(tema) {
+  let pool = tema === 'todos' ? [...preguntas] : preguntas.filter(q => q.tema === tema);
+  pool = mezclar(pool).slice(0, Math.min(pool.length, 12));
+  quizEstado = { pool, indice: 0, aciertos: 0, tema, sesionFallos: [] };
+
+  document.getElementById('quiz-selector').style.display = 'none';
+  document.getElementById('quiz-activo').style.display = '';
+  document.getElementById('quiz-resultado').style.display = 'none';
+  document.getElementById('quiz-tema-label').textContent = temasInfo[tema]?.label || tema;
+  mostrarPregunta();
+}
+
+function mostrarPregunta() {
+  const { pool, indice } = quizEstado;
+  if (indice >= pool.length) { mostrarResultado(); return; }
+
+  const q = pool[indice];
+  document.getElementById('pregunta-texto').textContent = q.p;
+  document.getElementById('quiz-progreso').textContent = `${indice + 1} / ${pool.length}`;
+  document.getElementById('barra-fill').style.width = `${(indice / pool.length) * 100}%`;
+
+  const cont = document.getElementById('opciones-container');
+  const opcMezcladas = mezclar(q.ops.map((o,i) => ({ texto:o, original:i })));
+  cont.innerHTML = opcMezcladas.map(({texto,original}) =>
+    `<button class="opcion" data-idx="${original}" onclick="seleccionarOpcion(${original},this)">${texto}</button>`
+  ).join('');
+
+  document.getElementById('feedback-box').style.display = 'none';
+  const btnSig = document.getElementById('btn-siguiente');
+  btnSig.disabled = true;
+  btnSig.textContent = 'Respondé para continuar →';
+}
+
+function seleccionarOpcion(idx, btnElegido) {
+  const q = quizEstado.pool[quizEstado.indice];
+  document.querySelectorAll('.opcion').forEach(b => b.disabled = true);
+
+  const correcta = (idx === q.r);
+  if (correcta) {
+    quizEstado.aciertos++;
+    btnElegido.classList.add('correcta');
+  } else {
+    btnElegido.classList.add('incorrecta');
+    document.querySelectorAll('.opcion').forEach(b => {
+      if (parseInt(b.dataset.idx) === q.r) b.classList.add('mostrar-correcta');
+    });
+    quizEstado.sesionFallos.push(q.p);
+  }
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box ' + (correcta ? 'ok' : 'mal');
+  fb.innerHTML = (correcta ? '✅ <strong>¡Correcto!</strong> ' : '❌ <strong>Incorrecto.</strong> ') + q.exp;
+  fb.style.display = 'block';
+  const btnSig = document.getElementById('btn-siguiente');
+  btnSig.disabled = false;
+  btnSig.textContent = 'Siguiente pregunta →';
+
+  registrarRespuesta(q.id, q.tema, correcta, q.p);
+}
+
+function siguientePregunta() { quizEstado.indice++; mostrarPregunta(); }
+
+function mostrarResultado() {
+  document.getElementById('quiz-activo').style.display = 'none';
+  document.getElementById('quiz-resultado').style.display = '';
+  const { aciertos, pool, sesionFallos } = quizEstado;
+  const pct = Math.round((aciertos / pool.length) * 100);
+  const el = document.getElementById('resultado-puntaje');
+  el.textContent = `${aciertos}/${pool.length}`;
+  el.style.color = pct >= 70 ? 'var(--verde)' : pct >= 50 ? 'var(--naranja)' : 'var(--rojo)';
+  document.getElementById('resultado-emoji').textContent = pct >= 80 ? '🏆' : pct >= 60 ? '💪' : '📖';
+  document.getElementById('resultado-msg').textContent = pct >= 80 ? '¡Excelente! Dominás este tema.' : pct >= 60 ? '¡Bien! Revisá las que fallaste.' : 'Hay temas para repasar. ¡El Modo Refuerzo te ayuda!';
+
+  const fc = document.getElementById('resultado-fallos-container');
+  if (sesionFallos.length > 0) {
+    fc.innerHTML = `<div class="resultado-detalle"><h4>📌 Preguntas para repasar:</h4><ul class="fallos-list">${sesionFallos.map(f=>`<li>${f}</li>`).join('')}</ul></div>`;
+  } else {
+    fc.innerHTML = '<div style="color:var(--verde);font-weight:600;margin:10px 0">✅ ¡Sin errores en esta sesión!</div>';
+  }
+  renderizarInicio();
+}
+
+function reiniciarQuiz() { iniciarQuiz(quizEstado.tema); }
+
+// =========================================
+// FLASHCARDS
+// =========================================
+let flashEstado = { tarjetas: [], indice: 0, volteada: false, sabidas: 0, noSabidas: [], evaluadas: 0 };
+const temaNombres = { gases:'Gases Combustibles', nociones:'Nociones Físicas', reguladores:'Reguladores y Medidores', herramientas:'Herramental', civil:'Construcción Civil' };
+
+function cargarFlashcards() {
+  const tema = document.getElementById('flash-tema-select').value;
+  const lista = tema === 'todos' ? [...flashcards] : flashcards.filter(f => f.tema === tema);
+  flashEstado = { tarjetas: lista, indice: 0, volteada: false, sabidas: 0, noSabidas: [], evaluadas: 0 };
+  document.getElementById('tarjeta').classList.remove('volteada');
+  document.getElementById('flash-resumen').classList.remove('visible');
+  document.getElementById('flash-deck').style.display = '';
+  actualizarBarraFlash();
+  mostrarFlash();
+}
+
+function mezclarFlash() {
+  const tema = document.getElementById('flash-tema-select').value;
+  const lista = tema === 'todos' ? [...flashcards] : flashcards.filter(f => f.tema === tema);
+  flashEstado = { tarjetas: mezclar(lista), indice: 0, volteada: false, sabidas: 0, noSabidas: [], evaluadas: 0 };
+  document.getElementById('tarjeta').classList.remove('volteada');
+  document.getElementById('flash-resumen').classList.remove('visible');
+  document.getElementById('flash-deck').style.display = '';
+  actualizarBarraFlash();
+  mostrarFlash();
+}
+
+function mostrarFlash() {
+  const { tarjetas, indice } = flashEstado;
+  if (!tarjetas.length) return;
+  const t = tarjetas[indice];
+  document.getElementById('flash-pregunta').textContent = t.p;
+  document.getElementById('flash-respuesta').textContent = t.r;
+  document.getElementById('flash-tema-badge').textContent = temaNombres[t.tema] || t.tema;
+  document.getElementById('flash-tema-badge-dorso').textContent = temaNombres[t.tema] || t.tema;
+  document.getElementById('flash-contador').textContent = `${indice + 1} / ${tarjetas.length}`;
+  // Ocultar botones de evaluación, mostrar solo voltear
+  document.getElementById('flash-eval-btns').classList.remove('visible');
+  document.getElementById('flash-hint-eval').style.display = 'none';
+  document.getElementById('flash-nav-voltear').style.display = 'flex';
+}
+
+function voltearTarjeta() {
+  if (flashEstado.volteada) return; // ya volteada, esperar evaluación
+  flashEstado.volteada = true;
+  document.getElementById('tarjeta').classList.add('volteada');
+  // Mostrar botones de evaluación
+  document.getElementById('flash-eval-btns').classList.add('visible');
+  document.getElementById('flash-hint-eval').style.display = 'block';
+  document.getElementById('flash-nav-voltear').style.display = 'none';
+}
+
+function evaluarFlash(sabia) {
+  const { tarjetas, indice } = flashEstado;
+  const t = tarjetas[indice];
+  flashEstado.evaluadas++;
+  if (sabia) {
+    flashEstado.sabidas++;
+  } else {
+    flashEstado.noSabidas.push(t.p);
+  }
+  // Registrar en progreso para que aparezca en Resumen y Refuerzo
+  registrarRespuesta(t.id, t.tema, sabia, '🃏 ' + t.p);
+  actualizarBarraFlash();
+  // Avanzar
+  const siguiente = indice + 1;
+  if (siguiente >= tarjetas.length) {
+    mostrarResumenFlash();
+  } else {
+    flashEstado.indice = siguiente;
+    flashEstado.volteada = false;
+    document.getElementById('tarjeta').classList.remove('volteada');
+    mostrarFlash();
+  }
+}
+
+function flashSiguienteAuto() {
+  // Saltar sin evaluar
+  const siguiente = flashEstado.indice + 1;
+  if (siguiente >= flashEstado.tarjetas.length) {
+    mostrarResumenFlash();
+  } else {
+    flashEstado.indice = siguiente;
+    flashEstado.volteada = false;
+    document.getElementById('tarjeta').classList.remove('volteada');
+    mostrarFlash();
+  }
+}
+
+function flashAnterior() {
+  if (flashEstado.indice > 0) {
+    flashEstado.indice--;
+    flashEstado.volteada = false;
+    document.getElementById('tarjeta').classList.remove('volteada');
+    mostrarFlash();
+  }
+}
+
+function actualizarBarraFlash() {
+  const total = flashEstado.tarjetas.length;
+  const s = flashEstado.sabidas;
+  const n = flashEstado.noSabidas.length;
+  const pctS = total > 0 ? (s / total) * 100 : 0;
+  const pctN = total > 0 ? (n / total) * 100 : 0;
+  document.getElementById('flash-barra-s').style.width = pctS + '%';
+  document.getElementById('flash-barra-n').style.width = pctN + '%';
+  document.getElementById('flash-label-s').textContent = `✅ ${s} sabía`;
+  document.getElementById('flash-label-n').textContent = `❌ ${n} no sabía`;
+}
+
+function mostrarResumenFlash() {
+  document.getElementById('flash-deck').style.display = 'none';
+  const res = document.getElementById('flash-resumen');
+  res.classList.add('visible');
+
+  const { sabidas, noSabidas, tarjetas } = flashEstado;
+  const total = tarjetas.length;
+  const evaluadas = sabidas + noSabidas.length;
+  const pct = evaluadas > 0 ? Math.round((sabidas / evaluadas) * 100) : 0;
+
+  document.getElementById('flash-res-emoji').textContent = pct >= 80 ? '🏆' : pct >= 60 ? '💪' : '📖';
+  document.getElementById('flash-res-subtitulo').textContent =
+    pct >= 80 ? `¡Excelente! Dominás ${pct}% de las tarjetas evaluadas.` :
+    pct >= 50 ? `Vas bien. Repasá las que no sabías para afianzar.` :
+    `Hay bastante para repasar. ¡El modo Refuerzo te ayuda!`;
+
+  document.getElementById('flash-res-sabia').textContent = sabidas;
+  document.getElementById('flash-res-no-sabia').textContent = noSabidas.length;
+
+  const lista = document.getElementById('flash-no-sabia-lista');
+  if (noSabidas.length > 0) {
+    lista.innerHTML = `<h4>📌 Conceptos para repasar (${noSabidas.length}):</h4>` +
+      noSabidas.map(p => `<div class="flash-no-sabia-item">• ${p}</div>`).join('');
+    document.getElementById('btn-repetir-no-sabidas').style.display = '';
+  } else {
+    lista.innerHTML = '<p style="color:var(--verde);font-weight:600;margin-top:8px">✅ ¡Sabías todas las tarjetas!</p>';
+    document.getElementById('btn-repetir-no-sabidas').style.display = 'none';
+  }
+}
+
+function repetirNoSabidas() {
+  const noSabidasTextos = new Set(flashEstado.noSabidas);
+  const filtradas = flashcards.filter(f => noSabidasTextos.has(f.p));
+  flashEstado = { tarjetas: mezclar(filtradas), indice: 0, volteada: false, sabidas: 0, noSabidas: [], evaluadas: 0 };
+  document.getElementById('tarjeta').classList.remove('volteada');
+  document.getElementById('flash-resumen').classList.remove('visible');
+  document.getElementById('flash-deck').style.display = '';
+  actualizarBarraFlash();
+  mostrarFlash();
+}
+
+// =========================================
+// CALCULADORA CAÑERÍA
+// =========================================
+const tablaPoole = [
+  {d:13,lMax:10,qMax:0.78},{d:13,lMax:20,qMax:0.55},{d:13,lMax:30,qMax:0.45},
+  {d:19,lMax:10,qMax:2.10},{d:19,lMax:20,qMax:1.48},{d:19,lMax:30,qMax:1.21},{d:19,lMax:40,qMax:1.05},{d:19,lMax:50,qMax:0.94},
+  {d:25,lMax:15,qMax:4.20},{d:25,lMax:20,qMax:3.60},{d:25,lMax:30,qMax:2.94},{d:25,lMax:40,qMax:2.55},{d:25,lMax:60,qMax:2.08},
+  {d:32,lMax:20,qMax:7.50},{d:32,lMax:30,qMax:5.80},{d:32,lMax:50,qMax:4.50},{d:32,lMax:70,qMax:3.80},
+  {d:38,lMax:30,qMax:9.80},{d:38,lMax:50,qMax:7.20},{d:38,lMax:80,qMax:5.70},
+];
+
+function getDiametro(lCalc, caudal) {
+  const ok = tablaPoole.filter(f => f.lMax >= lCalc && f.qMax >= caudal);
+  if (!ok.length) { const best = tablaPoole.filter(f => f.qMax >= caudal); return best.length ? best[0].d : 50; }
+  return Math.min(...ok.map(f => f.d));
+}
+
+let tramoCount = 0; let tramosData = [];
+
+function inicializarCalc() {
+  if (tramosData.length === 0) {
+    tramoCount = 0;
+    document.getElementById('tramos-container').innerHTML = '';
+    agregarTramo('1-A'); agregarTramo('A-M');
+  }
+}
+
+function agregarTramo(nombre) {
+  tramoCount++;
+  const id = tramoCount;
+  const div = document.createElement('div');
+  div.className = 'tramo-row'; div.id = 'tramo-' + id;
+  div.innerHTML = `
+    <input type="text" placeholder="1-A" value="${nombre||''}" id="t${id}-nom">
+    <input type="number" placeholder="4.75" step="0.01" id="t${id}-lr">
+    <input type="number" placeholder="14000" step="100" id="t${id}-pot">
+    <input type="number" placeholder="19.35" step="0.01" id="t${id}-lc" title="Longitud de cálculo">
+    <div style="display:flex;gap:3px;flex-wrap:wrap;font-size:0.76rem">
+      <label title="Llaves">🔑<input type="number" value="0" min="0" style="width:30px;padding:3px" id="t${id}-ll"></label>
+      <label title="Codos 90°">↪<input type="number" value="0" min="0" style="width:30px;padding:3px" id="t${id}-co"></label>
+      <label title="Tee través">⊥<input type="number" value="0" min="0" style="width:30px;padding:3px" id="t${id}-tt"></label>
+      <label title="Tee 90°">⊣<input type="number" value="0" min="0" style="width:30px;padding:3px" id="t${id}-t9"></label>
+    </div>
+    <div class="resultado-diam" id="t${id}-d">—</div>
+    <button class="btn-remove" onclick="eliminarTramo(${id})" title="Eliminar">✕</button>`;
+  document.getElementById('tramos-container').appendChild(div);
+  tramosData.push(id);
+}
+
+function eliminarTramo(id) {
+  document.getElementById('tramo-'+id)?.remove();
+  tramosData = tramosData.filter(i => i !== id);
+}
+
+function calcularCanieria() {
+  const PC = 9300;
+  const resultados = tramosData.map(id => {
+    const nom = document.getElementById(`t${id}-nom`)?.value || `T${id}`;
+    const lr = parseFloat(document.getElementById(`t${id}-lr`)?.value) || 0;
+    const pot = parseFloat(document.getElementById(`t${id}-pot`)?.value) || 0;
+    const lc = parseFloat(document.getElementById(`t${id}-lc`)?.value) || lr;
+    const ll = parseInt(document.getElementById(`t${id}-ll`)?.value) || 0;
+    const co = parseInt(document.getElementById(`t${id}-co`)?.value) || 0;
+    const tt = parseInt(document.getElementById(`t${id}-tt`)?.value) || 0;
+    const t9 = parseInt(document.getElementById(`t${id}-t9`)?.value) || 0;
+    const q = pot / PC;
+    const d1 = getDiametro(lc, q);
+    const dm = d1/1000;
+    const le = ll*100*dm + co*30*dm + tt*20*dm + t9*60*dm;
+    const lcTot = lc + le;
+    const d2 = getDiametro(lcTot, q);
+    document.getElementById(`t${id}-d`).textContent = d2 + ' mm';
+    return { nom, lr, lc, pot, q: q.toFixed(3), d1, le: le.toFixed(2), lcTot: lcTot.toFixed(2), d2 };
+  });
+
+  document.getElementById('tabla-resultado').innerHTML = `
+    <thead><tr><th>Tramo</th><th>L.Real</th><th>L.Cálculo</th><th>Potencia</th><th>Caudal m³/h</th><th>Diám. 1ª</th><th>L.Equiv.</th><th>L.Calc.Total</th><th>Diám. Final</th></tr></thead>
+    <tbody>${resultados.map(r=>`<tr><td><strong>${r.nom}</strong></td><td>${r.lr}m</td><td>${r.lc}m</td><td>${Number(r.pot).toLocaleString()} Kcal/h</td><td>${r.q}</td><td>${r.d1}mm</td><td>${r.le}m</td><td>${r.lcTot}m</td><td class="diam-result">${r.d2}mm</td></tr>`).join('')}</tbody>`;
+  document.getElementById('calc-notas').innerHTML = `<strong>Recordá:</strong> Tabla densidad 0,60-0,65 · h=10mm CA · Longitud equivalente: 🔑×100 · ↪×30 · ⊥×20 · ⊣×60`;
+  document.getElementById('resultado-calc').style.display = '';
+  document.getElementById('resultado-calc').scrollIntoView({ behavior:'smooth' });
+}
+
+// =========================================
+// RESUMEN — ACORDEÓN
+// =========================================
+function renderizarResumen() {
+  const prog = cargarProgreso();
+  const ids = Object.keys(prog);
+  if (!ids.length) {
+    document.getElementById('estadisticas-globales').innerHTML = '';
+    document.getElementById('resumen-contenido').innerHTML = `
+      <div class="resumen-empty">
+        <div class="big-icon">🌱</div>
+        <p>Todavía no hay progreso registrado.<br>¡Hacé tu primer Quiz o Flashcards y volvé acá!</p>
+        <button class="btn-accion primario" style="margin-top:14px" onclick="mostrarPantalla('quiz')">📝 Ir al Quiz</button>
+      </div>`;
+    return;
+  }
+
+  let totalAciertos = 0, totalErrores = 0, totalIntentos = 0;
+  ids.forEach(id => {
+    const v = prog[id];
+    totalAciertos += (v.intentos - v.errores);
+    totalErrores += v.errores;
+    totalIntentos += v.intentos;
+  });
+
+  document.getElementById('estadisticas-globales').innerHTML = `
+    <div class="stat-box"><div class="numero">${totalIntentos}</div><div class="etiqueta">Respondidas</div></div>
+    <div class="stat-box"><div class="numero" style="color:var(--verde)">${totalAciertos}</div><div class="etiqueta">Correctas</div></div>
+    <div class="stat-box"><div class="numero" style="color:var(--rojo)">${totalErrores}</div><div class="etiqueta">Errores</div></div>
+    <div class="stat-box"><div class="numero">${totalIntentos>0?Math.round((totalAciertos/totalIntentos)*100):0}%</div><div class="etiqueta">Efectividad</div></div>`;
+
+  const temasOrden = ['gases','nociones','reguladores','herramientas','civil'];
+  let html = '';
+
+  temasOrden.forEach(tema => {
+    // Todos los ítems de este tema en el progreso (quiz + flashcards + cualquier actividad)
+    const itemsTema = ids.filter(id => prog[id].tema === tema);
+    if (!itemsTema.length) return;
+
+    const errTema  = itemsTema.reduce((s,id) => s + prog[id].errores, 0);
+    const intTema  = itemsTema.reduce((s,id) => s + prog[id].intentos, 0);
+    const aciertos = intTema - errTema;
+    const pct      = intTema > 0 ? Math.round((aciertos / intTema) * 100) : 100;
+    const nivel    = pct >= 70 ? 'alto' : pct >= 50 ? 'medio' : 'bajo';
+    const etiq     = pct >= 70 ? '✅ Bien' : pct >= 50 ? '⚠️ Regular' : '❌ Repasar';
+    const colorEtiq = pct >= 70 ? 'var(--verde)' : pct >= 50 ? 'var(--naranja)' : 'var(--rojo)';
+
+    // Separar por tipo (quiz vs flashcard) para mostrar con distinto ícono
+    const falladasQuiz  = preguntas.filter(q => q.tema === tema && prog[q.id] && prog[q.id].errores > 0)
+      .sort((a,b) => prog[b.id].errores - prog[a.id].errores);
+    const falladasFlash = flashcards.filter(f => f.tema === tema && prog[f.id] && prog[f.id].errores > 0)
+      .sort((a,b) => prog[b.id].errores - prog[a.id].errores);
+    const bienQuiz  = preguntas.filter(q => q.tema === tema && prog[q.id] && prog[q.id].errores === 0);
+    const bienFlash = flashcards.filter(f => f.tema === tema && prog[f.id] && prog[f.id].errores === 0);
+    const noVistasQuiz  = preguntas.filter(q => q.tema === tema && !prog[q.id]);
+    const noVistasFlash = flashcards.filter(f => f.tema === tema && !prog[f.id]);
+
+    const totalFalladas = falladasQuiz.length + falladasFlash.length;
+    const totalBien     = bienQuiz.length + bienFlash.length;
+    const totalNoVistas = noVistasQuiz.length + noVistasFlash.length;
+
+    html += `
+    <div class="acord nivel-${nivel}">
+      <div class="acord-header" id="hdr-${tema}" onclick="toggleAcord('${tema}')">
+        <span style="font-size:1.3rem">${temasInfo[tema]?.icon}</span>
+        <span class="acord-titulo">${temaNombres[tema]}</span>
+        <span class="acord-meta" style="color:${colorEtiq}">${etiq} · ${pct}%</span>
+        <span style="font-size:0.75rem;color:#888;margin-left:6px">${itemsTema.length} vistas</span>
+        <span class="acord-chevron">▼</span>
+      </div>
+      <div class="acord-barra"><div class="acord-barra-fill" style="width:${pct}%;background:${pct>=70?'var(--verde)':pct>=50?'var(--naranja)':'var(--rojo)'}"></div></div>
+      <div class="acord-body" id="body-${tema}">
+        ${totalFalladas > 0 ? `
+          <p style="font-size:0.82rem;font-weight:600;color:var(--rojo);margin-bottom:8px">❌ ${totalFalladas} con errores:</p>
+          ${falladasQuiz.map(q => `
+            <div class="fallada-item" onclick="abrirModuloTema('${tema}')">
+              <span class="fi-icon">📝</span>
+              <span>${q.p}</span>
+              <span class="fi-count">${prog[q.id].errores}x</span>
+            </div>`).join('')}
+          ${falladasFlash.map(f => `
+            <div class="fallada-item" onclick="abrirModuloTema('${tema}')">
+              <span class="fi-icon">🃏</span>
+              <span>${f.p}</span>
+              <span class="fi-count">${prog[f.id].errores}x</span>
+            </div>`).join('')}
+          <button class="btn-accion primario" style="margin-top:10px;width:100%" onclick="abrirModuloTema('${tema}')">
+            🎯 Estudiar módulo de ${temaNombres[tema]}
+          </button>` : ''}
+        ${totalBien > 0 ? `
+          <p style="font-size:0.82rem;font-weight:600;color:var(--verde);margin:${totalFalladas?'12px':0} 0 6px">✅ ${totalBien} correctas</p>
+          ${bienQuiz.map(q=>`<div class="ok-item">📝 ${q.p}</div>`).join('')}
+          ${bienFlash.map(f=>`<div class="ok-item">🃏 ${f.p}</div>`).join('')}` : ''}
+        ${totalNoVistas > 0 ? `
+          <p style="font-size:0.8rem;color:#999;margin-top:10px">⬜ ${totalNoVistas} no vistas aún</p>` : ''}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('resumen-contenido').innerHTML = html || '<p style="color:#888">Completá más actividades para ver el desglose por tema.</p>';
+
+  // Abrir automáticamente los temas con errores (cualquier actividad)
+  temasOrden.forEach(tema => {
+    const tieneErrores = Object.values(cargarProgreso()).some(v => v.tema === tema && v.errores > 0);
+    if (tieneErrores) {
+      document.getElementById(`hdr-${tema}`)?.classList.add('abierto');
+      document.getElementById(`body-${tema}`)?.classList.add('abierto');
+    }
+  });
+}
+
+function toggleAcord(tema) {
+  const hdr = document.getElementById(`hdr-${tema}`);
+  const body = document.getElementById(`body-${tema}`);
+  hdr.classList.toggle('abierto');
+  body.classList.toggle('abierto');
+}
+
+// =========================================
+// CONTENIDO DE LECCIONES POR TEMA
+// =========================================
+const lecciones = {
+  gases: [
+    { titulo: '🔥 ¿Qué es la Combustión?', cuerpo: `
+      <div class="ls-dato">💡 La combustión es la <strong>combinación rápida de un combustible con oxígeno</strong>, con producción de calor y luz. Para iniciarla se necesita suministrar energía.</div>
+      <div class="ls-dato">✅ Productos <strong>NO tóxicos</strong> (combustión completa): CO₂, vapor de agua y nitrógeno.</div>
+      <div class="ls-dato">☠️ El <strong>CO (monóxido de carbono) SÍ es tóxico</strong> — aparece en combustión incompleta.</div>
+      <div class="ls-tip">💡 Truco: CO₂ es "dióxido" (dos oxígenos) y NO tóxico. CO es "monóxido" (uno) y SÍ tóxico.</div>` },
+    { titulo: '⛽ Gas Natural — Características', cuerpo: `
+      <div class="ls-dato">🔑 Componente principal: <strong>METANO (CH₄) en un 95-98%</strong>.</div>
+      <div class="ls-dato">⚠️ El metano liberado a la atmósfera es <strong>~16 veces más contaminante</strong> que sus gases de combustión.</div>
+      <div style="background:white;border-radius:8px;padding:12px;margin-top:8px;border-left:3px solid var(--verde-accent)">
+        <p style="font-size:0.84rem;font-weight:700;color:var(--verde-oscuro);margin-bottom:8px">🗺️ Poder calorífico por yacimiento:</p>
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+          <tr style="background:var(--verde-claro)"><td style="padding:6px 10px">Comodoro Rivadavia</td><td style="padding:6px 10px;font-weight:700;text-align:right">9.300 Kcal/m³</td></tr>
+          <tr><td style="padding:6px 10px">Campo Durán</td><td style="padding:6px 10px;font-weight:700;text-align:right">9.300 Kcal/m³</td></tr>
+          <tr style="background:var(--verde-claro)"><td style="padding:6px 10px">Plaza Huincul</td><td style="padding:6px 10px;font-weight:700;text-align:right">9.600 Kcal/m³</td></tr>
+          <tr><td style="padding:6px 10px">Mendoza</td><td style="padding:6px 10px;font-weight:700;color:var(--verde);text-align:right">13.000 Kcal/m³ ⬆️ más alto</td></tr>
+        </table>
+      </div>
+      <div class="ls-tip">💡 Referencia de cálculo estándar siempre: <strong>9.300 Kcal/m³</strong></div>` },
+    { titulo: '🔵 Gas Grado 1 — Propano (C₃H₈)', cuerpo: `
+      <div class="ls-dato">🧪 Fórmula: <strong>C₃H₈</strong> (3 carbonos, 8 hidrógenos)</div>
+      <div class="ls-dato">🌡️ Estado líquido a: <strong>-44°C</strong>. A temp. más altas necesita compresión.</div>
+      <div class="ls-dato">📦 Distribución: <strong>cilindros de 45 kg</strong> = 24 m³ de gas = 537.120 Kcal</div>
+      <div class="ls-dato">🔢 Datos clave:<br>• Poder calorífico: <strong>22.380 Kcal/m³</strong><br>• Densidad: <strong>1,52</strong><br>• Presión de utilización: <strong>280 mmca</strong><br>• Aire para combustión: <strong>24 m³ de aire por m³ de gas</strong></div>
+      <div class="ls-tip">💡 Truco: Propano = P = "Primero" = Grado 1. Cilindros grandes (45 kg).</div>` },
+    { titulo: '🟠 Gas Grado 3 — Butano (C₄H₁₀)', cuerpo: `
+      <div class="ls-dato">🧪 Fórmula: <strong>C₄H₁₀</strong> (4 carbonos, 10 hidrógenos)</div>
+      <div class="ls-dato">🌡️ Estado líquido a: <strong>-17°C</strong>. No se usa en grandes demandas (ej. calefones).</div>
+      <div class="ls-dato">📦 Distribución: <strong>garrafas de 10 kg y 15 kg</strong></div>
+      <div class="ls-dato">🔢 Datos clave:<br>• Poder calorífico: <strong>27.482 Kcal/m³</strong><br>• Densidad: <strong>1,91</strong><br>• Presión de utilización: <strong>320 mmca</strong><br>• Aire para combustión: <strong>30 m³ de aire por m³ de gas</strong></div>
+      <div class="ls-tip">💡 Comparación: Butano = Más pesado (densidad 1,91 vs 1,52) y más calorífico que el Propano, pero se licúa a mayor temperatura (-17°C vs -44°C).</div>` },
+    { titulo: '🌿 GNS y Biogás', cuerpo: `
+      <div class="ls-dato">🔄 <strong>GNS (Gas Natural Sintético)</strong>: mezcla de propano/butano con aire que iguala el <strong>índice Wobbe</strong> del GN. Proceso: líquido → vaporizador → mezclador → red.</div>
+      <div class="ls-dato">♻️ <strong>Biogás</strong>: gas combustible generado por <strong>biodegradación de materia orgánica en ambiente anaeróbico</strong> (sin oxígeno). Se obtiene de residuos orgánicos.</div>
+      <div class="ls-tip">💡 Biogás = BIO (vida) + GAS. Viene de la descomposición natural de la materia orgánica sin oxígeno.</div>` },
+  ],
+  nociones: [
+    { titulo: '📏 SIMELA — Sistema de Medición', cuerpo: `
+      <div class="ls-dato">📜 <strong>SIMELA</strong> = Sistema Métrico Legal Argentino. Establecido por la <strong>Ley 19.511 de 1972</strong>.</div>
+      <div class="ls-dato">⚖️ Es de uso <strong>obligatorio y exclusivo</strong> en Argentina. Basado en el Sistema Internacional (SI).</div>
+      <div class="ls-dato">🔢 Incluye múltiplos (kilo=×1000, mega=×1.000.000) y submúltiplos (mili=÷1000, micro=÷1.000.000).</div>` },
+    { titulo: '🌡️ Temperatura — Las 3 Escalas', cuerpo: `
+      <div class="ls-dato">🌡️ <strong>Celsius (°C)</strong>: agua congela a 0°C, hierve a 100°C.</div>
+      <div class="ls-dato">🌡️ <strong>Kelvin (K)</strong>: K = °C + 273. Cero absoluto = 0 K = -273°C (cesa el movimiento molecular).</div>
+      <div class="ls-dato">🌡️ <strong>Fahrenheit (°F)</strong>: °F = (°C × 9/5) + 32. Agua hierve a 212°F.</div>
+      <div class="ls-dato">📊 Tabla de referencia:<br>• Agua hierve: 100°C = 373 K = 212°F<br>• Agua congela: 0°C = 273 K = 32°F<br>• Cero absoluto: -273°C = 0 K</div>
+      <div class="ls-tip">💡 Truco Kelvin: sumá 273 a los grados Celsius. Siempre positivo.</div>` },
+    { titulo: '🔥 Calor — Conceptos clave', cuerpo: `
+      <div class="ls-dato">🔥 <strong>Calor</strong>: manifestación de energía provocada por el movimiento vibratorio de átomos y moléculas.</div>
+      <div class="ls-dato">🧪 <strong>1 Caloría (cal)</strong>: calor para elevar 1°C la temperatura de 1 gramo de agua (de 14,5 a 15,5°C).</div>
+      <div class="ls-dato">🧪 <strong>1 Kilocaloría (kcal)</strong> = 1.000 cal = calor para elevar 1°C temperatura de 1 kg de agua.</div>
+      <div class="ls-dato">💧 <strong>Calor específico del agua</strong>: <strong>1 kcal/kg·°C</strong> (la referencia universal).</div>
+      <div class="ls-dato">🔋 <strong>Poder Calorífico</strong>: cantidad de calor entregado por una unidad de combustible durante la combustión (Kcal/m³ para gases).</div>` },
+    { titulo: '🌬️ Transmisión del Calor', cuerpo: `
+      <div class="ls-dato">1️⃣ <strong>Conducción</strong>: transferencia por contacto directo entre sólidos.</div>
+      <div class="ls-dato">2️⃣ <strong>Convección</strong>: por movimiento de fluidos. El aire caliente sube (menos denso), el frío baja. Por eso los calefactores van abajo (10-20 cm del piso) y los aires acondicionados van arriba.</div>
+      <div class="ls-dato">3️⃣ <strong>Radiación</strong>: ondas electromagnéticas que viajan a <strong>300.000 km/s</strong>, sin necesitar medio material. Cuerpos oscuros absorben más calor que los blancos/brillantes.</div>
+      <div class="ls-tip">💡 Regla convección: CALOR sube → calefactor abajo. FRÍO baja → aire acondicionado arriba.</div>` },
+    { titulo: '💨 Caudal, Presión y Consumo', cuerpo: `
+      <div class="ls-dato">💧 <strong>Caudal</strong>: volumen de fluido que circula por una tubería en la unidad de tiempo (m³/h).</div>
+      <div class="ls-dato">⚡ <strong>Presión</strong>: fuerza ejercida por unidad de superficie (kg/cm²). Otras unidades: mmca, bar, atm.</div>
+      <div class="ls-dato">🧮 <strong>Consumo (m³/h)</strong> = Potencia (Kcal/h) ÷ Poder Calorífico (Kcal/m³)</div>
+      <div class="ls-dato">📝 Ejemplo: Calefactor 3.000 Kcal/h con GN → 3.000 ÷ 9.300 = <strong>0,32 m³/h</strong></div>
+      <div class="ls-tip">💡 La presión de distribución NO es constante: sufre pérdidas de carga a lo largo del recorrido.</div>` },
+  ],
+  reguladores: [
+    { titulo: '⚙️ ¿Qué es un Regulador?', cuerpo: `
+      <div class="ls-dato">🎯 El regulador <strong>mantiene presión constante aguas abajo</strong>, independientemente de variaciones de entrada o cambios de caudal.</div>
+      <div class="ls-dato">📥 Presión de <strong>entrada</strong>: 0,5 a 4 bar (0,5 a 4 kg/cm²)</div>
+      <div class="ls-dato">📤 Presión de <strong>salida</strong>: 0,019 bar (~190 mmca)</div>
+      <div class="ls-dato">📍 Ubicación: <strong>nicho sobre la línea municipal</strong>, con llave de paso tipo candado que lo precede.</div>
+      <div class="ls-dato">📐 Capacidades nominales: <strong>6 · 10 · 25 · 40 · 65 · 100 m³/h</strong></div>
+      <div class="ls-tip">💡 Ajuste de presión: apretando el tornillo (rosca <strong>izquierda</strong>) sale <strong>más</strong> presión. Son todos POSITIVOS.</div>` },
+    { titulo: '🛡️ Funciones de Seguridad del Regulador', cuerpo: `
+      <div class="ls-dato">🚫 El regulador <strong>corta el gas</strong> automáticamente cuando:<br>• Caída anormal de <strong>presión de entrada</strong><br>• Caída anormal de <strong>presión de salida</strong><br>• <strong>Exceso de caudal</strong><br>• <strong>Rotura del diafragma</strong></div>
+      <div class="ls-dato">📜 Norma vigente: <strong>NAG 235-2019</strong> (reemplaza NAG 135 y NAG 235-1995). Establece requisitos de seguridad, fabricación y funcionamiento.</div>
+      <div class="ls-dato">🔗 Conexiones: pueden ser en <strong>escuadra (L a 90°)</strong> o en <strong>línea recta</strong>. Respetar posición del fabricante.</div>` },
+    { titulo: '📊 Medidores de Gas — Tipos', cuerpo: `
+      <div class="ls-dato">1️⃣ <strong>Medidor de Diafragma</strong>: bajas presiones. Domiciliario hasta <strong>10 m³/h</strong> (fabricado hasta 40 m³/h). Tiene juntas dieléctricas. El más común en hogares.</div>
+      <div class="ls-dato">2️⃣ <strong>Medidor Rotativo</strong>: 2 lóbulos rotativos. Grandes consumos (MAC). Precisión <strong>0,5%</strong>. Presiones más altas. Bajo mantenimiento. Versiones mecánica y electrónica.</div>
+      <div class="ls-tip">💡 Regla: Diafragma = Domicilio. Rotativo = Industria/Gran consumo (MAC).</div>` },
+    { titulo: '🔩 Rosca Whitworth Gas (BSP)', cuerpo: `
+      <div class="ls-dato">🔧 Tipo: <strong>Rosca Whitworth Gas</strong> (British Standard Pipe Thread — BSP).</div>
+      <div class="ls-dato">📐 Puede ser <strong>paralela o cónica</strong>. La cónica tiene inclinación de <strong>1 mm por cada 16 mm</strong> de longitud.</div>
+      <div class="ls-dato">✅ Las conexiones deben sellarse con <strong>pastas aprobadas</strong>. No deben quedar filetes de rosca expuestos fuera del accesorio.</div>
+      <div class="ls-tip">💡 La rosca cónica "se aprieta sola" al enroscar, generando el sello. La paralela necesita sello adicional.</div>` },
+  ],
+  herramientas: [
+    { titulo: '🔧 Llaves del Gasista', cuerpo: `
+      <div class="ls-dato">🔑 <strong>Stillson (llave de perro)</strong>: para tubos grandes, gran par de apriete. Tamaños en pulgadas (8 a 48). Patentada en 1869 por Daniel Chapman Stillson.</div>
+      <div class="ls-dato">🔑 <strong>Llave Inglesa</strong>: cabeza móvil ajustable. Para tuercas y tornillos. Patentada en 1892 por Johan Petter Johansson.</div>
+      <div class="ls-dato">🔑 <strong>Llave Sueca</strong>: para tubos de fontanería. Anillo ajustable al diámetro. Inventada en 1888.</div>
+      <div class="ls-dato">🔑 <strong>Llave Francesa</strong>: forma de T con doble garganta. Obsoleta, reemplazada por la Inglesa.</div>
+      <div class="ls-tip">💡 Truco: Stillson = Tubos. Inglesa = Tuercas. Sueca = Fontanería con anillo.</div>` },
+    { titulo: '🛠️ Herramientas Infaltables del Gasista', cuerpo: `
+      <div class="ls-dato">🔍 <strong>Detector de gases</strong>: detecta fugas. También se usa detergente neutro en uniones.</div>
+      <div class="ls-dato">💧 <strong>Columna de agua</strong>: mide presiones bajas en mmca. Verifica presión del regulador (~180 mmca) y caída máxima (10 mmca).</div>
+      <div class="ls-dato">📊 <strong>Manómetro</strong>: mide presiones (pruebas de estanqueidad).</div>
+      <div class="ls-dato">🌀 <strong>Dobladora de caños, pestañadora, corta-caño, escariador</strong>: preparación de caños.</div>
+      <div class="ls-dato">🧴 <strong>Grasa grafitada / Sella-roscas / Cinta teflón</strong>: sellado de uniones roscadas.</div>` },
+    { titulo: '⚡ Herramientas Eléctricas', cuerpo: `
+      <div class="ls-dato">🔌 <strong>Termofusora</strong>: une caños de polietileno (Sigas, Fusiogas, Vantec) por fusión térmica. Esencial en instalaciones PE.</div>
+      <div class="ls-dato">🔌 <strong>Taladro</strong>: perforaciones en paredes y losas.</div>
+      <div class="ls-dato">🔌 <strong>Amoladora</strong>: corte con discos específicos (no confundir tipos de disco).</div>
+      <div class="ls-dato">🔌 <strong>Rotomartillo</strong>: demolición de mampostería (con cincel).</div>
+      <div class="ls-dato">🔌 <strong>Roscadora eléctrica / Terraja manual</strong>: para hacer roscas en caños y tornillos.</div>` },
+    { titulo: '🦺 Seguridad Personal (EPP)', cuerpo: `
+      <div class="ls-dato">👁️ <strong>Antiparras</strong>: protección ocular ante chispas y partículas.</div>
+      <div class="ls-dato">🧤 <strong>Guantes</strong>: protección de manos.</div>
+      <div class="ls-dato">👂 <strong>Protectores auditivos</strong>: ante ruido de maquinaria.</div>
+      <div class="ls-dato">🩹 <strong>Faja lumbar</strong>: protección de columna en esfuerzos.</div>
+      <div class="ls-dato">🚧 <strong>Cinta de peligro</strong>: señalización de zona de trabajo.</div>
+      <div class="ls-dato">🧰 <strong>Botiquín de primeros auxilios</strong>: atención inmediata de incidentes.</div>
+      <div class="ls-tip">💡 Regla: Nunca trabajar sin EPP. El gasista que cuida su seguridad cuida también a sus clientes.</div>` },
+  ],
+  civil: [
+    { titulo: '🏗️ Términos Urbanísticos Clave', cuerpo: `
+      <div class="ls-dato">📍 <strong>Nomenclatura Catastral</strong>: identificador para individualizar parcelas. Ej: 15-21-001-9999-0000 (lote, manzana, dirección).</div>
+      <div class="ls-dato">📏 <strong>Línea Municipal</strong>: límite entre la parcela y la vía pública. Define el área edificable en el frente.</div>
+      <div class="ls-dato">📏 <strong>Eje Medianero</strong>: línea que separa dos predios o lotes. Punto de conflicto habitual en construcción.</div>
+      <div class="ls-dato">🔲 <strong>Chaflán (Ochava)</strong>: corte oblicuo en esquina de manzana para mejorar visibilidad y circulación.</div>
+      <div class="ls-dato">📌 <strong>Mojón</strong>: poste clavado en el suelo que marca límite de territorio o propiedad.</div>` },
+    { titulo: '📄 Documentación para la Distribuidora', cuerpo: `
+      <div class="ls-dato">📋 <strong>Certificado de domicilio</strong>: constata la veracidad del domicilio ante la distribuidora.</div>
+      <div class="ls-dato">📋 <strong>VEP</strong> (Verificación de Subsistencia del Estado Parcelario): confirma el estado legal de la parcela.</div>
+      <div class="ls-dato">📋 <strong>Nomenclatura Catastral</strong>: identifica la parcela donde se realizará la instalación.</div>
+      <div class="ls-tip">💡 Sin estos documentos NO se puede realizar la presentación ante la distribuidora de gas.</div>` },
+    { titulo: '⛏️ Zanjas y Replanteo', cuerpo: `
+      <div class="ls-dato">📐 <strong>Replanteo</strong>: ubicación de puntos en el terreno según los planos, previo a la construcción. Para zanjas de gas: hilos guías sobre caballetes.</div>
+      <div class="ls-dato">⚠️ <strong>Regla fundamental</strong>: la cañería de gas <strong>NO SE PUEDE CURVAR NI TORSIONAR bajo ninguna circunstancia</strong>. Las zanjas deben ser RECTAS. Los cambios de dirección se hacen con codos (accesorios).</div>
+      <div class="ls-dato">🔒 Medidas de seguridad en zanjas: señalizar, separar tierra del borde, tener en cuenta el esponjado.</div>
+      <div class="ls-tip">💡 Regla de oro: Cañería de gas = SIEMPRE RECTA. Nunca doblar el caño a mano.</div>` },
+    { titulo: '🧱 Materiales de Construcción', cuerpo: `
+      <div class="ls-dato">🏗️ <strong>Cemento</strong>: se obtiene calcinando a <strong>1.450°C</strong> piedra caliza + arcilla + mineral de hierro → clínker → se muele con yeso y aditivos.</div>
+      <div class="ls-dato">🏗️ <strong>Arena</strong>: agregado fino para concreto y mortero. Partículas de rocas trituradas.</div>
+      <div class="ls-dato">🏗️ <strong>Mortero</strong>: mezcla de conglomerante (cemento/cal) + arena + agua + aditivos. Deben ser homogéneos.</div>
+      <div class="ls-dato">📦 <strong>Almacenamiento de caños epoxi</strong>: no arrastrar ni rodar, lugares cerrados, separados del piso con material blando, sin golpes, proteger puntas del agua.</div>` },
+  ],
+};
+
+// =========================================
+// REFUERZO — MÓDULOS DE ENSEÑANZA
+// =========================================
+let moduloActivo = { tema: '', leccionIdx: 0, practicaPool: [], practicaIdx: 0, practicaAciertos: 0 };
+
+function inicializarRefuerzo() {
+  const prog = cargarProgreso();
+
+  // Detectar errores en CUALQUIER actividad (quiz, flashcards, y futuras)
+  const errPorTema = {};
+  Object.values(prog).forEach(v => {
+    if (v.errores > 0) errPorTema[v.tema] = (errPorTema[v.tema] || 0) + v.errores;
+  });
+
+  ['refuerzo-sin-datos','refuerzo-modulos-lista','refuerzo-leccion','refuerzo-practica','refuerzo-resultado']
+    .forEach(id => document.getElementById(id).style.display = 'none');
+
+  if (!Object.keys(errPorTema).length) {
+    document.getElementById('refuerzo-sin-datos').style.display = '';
+    return;
+  }
+
+  // Construir tarjetas de módulos ordenadas por errores
+  const temasConErr = Object.entries(errPorTema).sort((a,b)=>b[1]-a[1]);
+  const temasOk = ['gases','nociones','reguladores','herramientas','civil'].filter(t => !errPorTema[t]);
+
+  let gridHTML = temasConErr.map(([tema, errTotal]) => {
+    const itemsConErr = Object.values(prog).filter(v => v.tema === tema && v.errores > 0).length;
+    return `
+    <div class="modulo-card" style="border-left:4px solid var(--rojo);cursor:pointer" onclick="abrirModuloTema('${tema}')">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="font-size:2rem">${temasInfo[tema]?.icon}</span>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:0.95rem">${temaNombres[tema]}</div>
+          <div style="font-size:0.8rem;color:var(--rojo)">${itemsConErr} ítem(s) con errores · ${errTotal} fallos totales</div>
+        </div>
+        <span style="font-size:1.5rem">→</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span style="background:var(--rojo-suave);color:var(--rojo);border-radius:6px;padding:3px 10px;font-size:0.78rem;font-weight:600">📖 Lección + Práctica</span>
+        <span style="background:var(--verde-claro);color:var(--verde);border-radius:6px;padding:3px 10px;font-size:0.78rem">${lecciones[tema]?.length||0} conceptos</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  if (temasOk.length) {
+    gridHTML += `<div class="card" style="opacity:0.7">
+      <p style="font-size:0.85rem;color:var(--verde);font-weight:600">✅ Sin errores en estos temas:</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        ${temasOk.map(t=>`<span class="chip-tema chip-ok">${temasInfo[t]?.icon} ${temaNombres[t]}</span>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('modulos-grid').innerHTML = gridHTML;
+  document.getElementById('refuerzo-modulos-lista').style.display = '';
+}
+
+function abrirModuloTema(tema) {
+  mostrarPantalla('refuerzo');
+  const prog = cargarProgreso();
+  const falladas = preguntas.filter(q => q.tema === tema && prog[q.id] && prog[q.id].errores > 0)
+    .sort((a,b) => prog[b.id].errores - prog[a.id].errores);
+
+  moduloActivo = {
+    tema,
+    leccionIdx: 0,
+    practicaPool: mezclar(falladas),
+    practicaIdx: 0,
+    practicaAciertos: 0,
+  };
+
+  ['refuerzo-sin-datos','refuerzo-modulos-lista','refuerzo-practica','refuerzo-resultado']
+    .forEach(id => document.getElementById(id).style.display = 'none');
+
+  document.getElementById('refuerzo-leccion').style.display = '';
+  mostrarLeccion();
+}
+
+function stepsHTML(fase) {
+  return `<span class="step-pill ${fase==='leccion'?'activo':'hecho'}">📖 Lección</span>
+          <span class="step-pill ${fase==='practica'?'activo':fase==='fin'?'hecho':''}">✏️ Práctica</span>`;
+}
+
+function mostrarLeccion() {
+  const { tema, leccionIdx } = moduloActivo;
+  const slides = lecciones[tema] || [];
+  const slide = slides[leccionIdx];
+  if (!slide) { iniciarPractica(); return; }
+
+  document.getElementById('leccion-titulo').innerHTML = `${temasInfo[tema]?.icon} ${temaNombres[tema]} — Lección`;
+  document.getElementById('leccion-steps').innerHTML = stepsHTML('leccion');
+  document.getElementById('leccion-contador').textContent = `Concepto ${leccionIdx+1} de ${slides.length}`;
+
+  document.getElementById('leccion-contenido').innerHTML = `
+    <div class="leccion-slide">
+      <div class="ls-titulo">${slide.titulo}</div>
+      <div class="ls-cuerpo">${slide.cuerpo}</div>
+    </div>`;
+
+  const btnAnt = document.getElementById('leccion-btn-ant');
+  const btnSig = document.getElementById('leccion-btn-sig');
+  btnAnt.style.display = leccionIdx === 0 ? 'none' : '';
+
+  const esUltimo = leccionIdx >= slides.length - 1;
+  btnSig.textContent = esUltimo ? '✏️ Pasar a la Práctica →' : 'Siguiente concepto →';
+  btnSig.className = 'btn-leccion ' + (esUltimo ? 'practicar' : 'siguiente');
+}
+
+function leccionSiguiente() {
+  const slides = lecciones[moduloActivo.tema] || [];
+  if (moduloActivo.leccionIdx >= slides.length - 1) {
+    iniciarPractica();
+  } else {
+    moduloActivo.leccionIdx++;
+    mostrarLeccion();
+  }
+}
+
+function leccionAnterior() {
+  if (moduloActivo.leccionIdx > 0) {
+    moduloActivo.leccionIdx--;
+    mostrarLeccion();
+  }
+}
+
+function iniciarPractica() {
+  document.getElementById('refuerzo-leccion').style.display = 'none';
+  document.getElementById('refuerzo-practica').style.display = '';
+  document.getElementById('practica-titulo').innerHTML = `${temasInfo[moduloActivo.tema]?.icon} ${temaNombres[moduloActivo.tema]} — Práctica`;
+  document.getElementById('practica-steps').innerHTML = stepsHTML('practica');
+  document.getElementById('practica-badge').textContent = `✏️ Practicá ${temaNombres[moduloActivo.tema]}`;
+  moduloActivo.practicaIdx = 0;
+  moduloActivo.practicaAciertos = 0;
+  mostrarPreguntaPractica();
+}
+
+function mostrarPreguntaPractica() {
+  const { practicaPool, practicaIdx } = moduloActivo;
+  if (practicaIdx >= practicaPool.length) { mostrarResultadoPractica(); return; }
+
+  const q = practicaPool[practicaIdx];
+  const prog = cargarProgreso();
+  const veces = prog[q.id]?.errores || 0;
+  document.getElementById('refuerzo-pregunta-texto').innerHTML =
+    `<span style="font-size:0.78rem;color:var(--rojo);font-weight:600">Fallaste esta ${veces}x</span><br><br>${q.p}`;
+  document.getElementById('refuerzo-progreso').textContent = `${practicaIdx+1} / ${practicaPool.length}`;
+  document.getElementById('barra-fill-refuerzo').style.width = `${(practicaIdx/practicaPool.length)*100}%`;
+
+  const cont = document.getElementById('refuerzo-opciones');
+  const mezcladas = mezclar(q.ops.map((o,i)=>({texto:o,original:i})));
+  cont.innerHTML = mezcladas.map(({texto,original}) =>
+    `<button class="opcion" data-idx="${original}" onclick="refuerzoResponder(${original},this)">${texto}</button>`
+  ).join('');
+
+  document.getElementById('refuerzo-feedback').style.display = 'none';
+  const btn = document.getElementById('refuerzo-btn-sig');
+  btn.disabled = true;
+  btn.textContent = 'Respondé para continuar →';
+}
+
+function refuerzoResponder(idx, btn) {
+  const q = moduloActivo.practicaPool[moduloActivo.practicaIdx];
+  document.querySelectorAll('#refuerzo-opciones .opcion').forEach(b => b.disabled = true);
+  const correcta = idx === q.r;
+  if (correcta) { moduloActivo.practicaAciertos++; btn.classList.add('correcta'); }
+  else {
+    btn.classList.add('incorrecta');
+    document.querySelectorAll('#refuerzo-opciones .opcion').forEach(b => {
+      if (parseInt(b.dataset.idx) === q.r) b.classList.add('mostrar-correcta');
+    });
+  }
+  const fb = document.getElementById('refuerzo-feedback');
+  fb.className = 'feedback-box ' + (correcta ? 'ok' : 'mal');
+  fb.innerHTML = (correcta ? '✅ <strong>¡Correcto!</strong> ' : '❌ <strong>Incorrecto.</strong> ') + q.exp;
+  fb.style.display = 'block';
+  const btnSig = document.getElementById('refuerzo-btn-sig');
+  btnSig.disabled = false;
+  btnSig.textContent = 'Siguiente →';
+  registrarRespuesta(q.id, q.tema, correcta, q.p);
+}
+
+function refuerzoSiguiente() {
+  moduloActivo.practicaIdx++;
+  mostrarPreguntaPractica();
+}
+
+function mostrarResultadoPractica() {
+  document.getElementById('refuerzo-practica').style.display = 'none';
+  document.getElementById('refuerzo-resultado').style.display = '';
+  const { practicaAciertos, practicaPool } = moduloActivo;
+  const pct = Math.round((practicaAciertos / practicaPool.length) * 100);
+  const el = document.getElementById('refuerzo-puntaje');
+  el.textContent = `${practicaAciertos}/${practicaPool.length}`;
+  el.style.color = pct >= 70 ? 'var(--verde)' : pct >= 50 ? 'var(--naranja)' : 'var(--rojo)';
+  document.getElementById('refuerzo-res-emoji').textContent = pct >= 80 ? '🏆' : pct >= 60 ? '💪' : '📖';
+  document.getElementById('refuerzo-msg').textContent =
+    pct >= 80 ? `¡Excelente! Dominás ${temaNombres[moduloActivo.tema]} 🌟` :
+    pct >= 60 ? 'Vas mejorando. Volvé a repasar la lección si quedaron dudas.' :
+    'Repasá la lección de nuevo y volvé a practicar. ¡Cada intento cuenta! 💪';
+  renderizarInicio();
+}
+
+function volverModulos() { inicializarRefuerzo(); }
+
+// =========================================
+// INIT
+// =========================================
+actualizarBadges();
+renderizarInicio();
+mostrarPantalla('inicio');
+</script>
+</body>
+</html>

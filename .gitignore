@@ -1,0 +1,6 @@
+cv-digitalizador/
+repaso-gasista.html
+*.py
+*.pdf
+__pycache__/
+.env
