@@ -479,6 +479,47 @@
   .sim-rev-item.mal { background:var(--rojo-suave); border-left-color:var(--rojo); }
   .sim-rev-item .sim-tipo-mini { font-size:0.7rem; opacity:0.7; }
 
+  /* ADMIN PANEL */
+  .admin-tabs { display:flex; gap:0; border-bottom:2px solid var(--borde); margin-bottom:16px; overflow-x:auto; }
+  .admin-tab { padding:9px 16px; border:none; background:none; cursor:pointer; font-size:0.85rem; color:#888; border-bottom:3px solid transparent; margin-bottom:-2px; white-space:nowrap; transition:all 0.2s; flex-shrink:0; }
+  .admin-tab.active { color:var(--verde); border-bottom-color:var(--verde); font-weight:600; }
+  .admin-tab:hover { color:var(--verde); }
+  .admin-q-card {
+    background:white; border:1px solid var(--borde); border-radius:10px;
+    padding:12px 14px; margin-bottom:8px; transition:box-shadow 0.15s;
+  }
+  .admin-q-card:hover { box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+  .admin-q-header { display:flex; align-items:flex-start; gap:10px; }
+  .admin-q-id { font-size:0.7rem; background:var(--verde-suave); color:var(--verde-oscuro); border-radius:4px; padding:2px 7px; font-weight:700; flex-shrink:0; margin-top:2px; }
+  .admin-q-id.custom { background:#fff3e0; color:#e65100; }
+  .admin-q-texto { font-size:0.88rem; flex:1; line-height:1.5; }
+  .admin-q-respuesta { font-size:0.8rem; color:var(--verde); margin-top:6px; font-weight:600; }
+  .admin-q-actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .btn-admin-sm { padding:5px 12px; border-radius:6px; border:1px solid var(--borde); background:white; cursor:pointer; font-size:0.78rem; transition:all 0.15s; }
+  .btn-admin-sm.eliminar { border-color:#ffcdd2; color:var(--rojo); }
+  .btn-admin-sm.eliminar:hover { background:var(--rojo-suave); }
+  .btn-admin-sm.editar { border-color:var(--verde-suave); color:var(--verde); }
+  .btn-admin-sm.editar:hover { background:var(--verde-claro); }
+  .admin-add-form { background:white; border:2px dashed var(--verde-suave); border-radius:12px; padding:18px; margin-bottom:16px; }
+  .admin-add-form h4 { color:var(--verde); margin-bottom:14px; font-size:0.95rem; }
+  .admin-form-row { display:grid; gap:10px; margin-bottom:10px; }
+  .admin-form-row.cols2 { grid-template-columns:1fr 1fr; }
+  .admin-form-row.cols4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+  .admin-form-row label { font-size:0.78rem; font-weight:600; color:#555; display:block; margin-bottom:4px; }
+  .admin-form-row input, .admin-form-row select, .admin-form-row textarea {
+    width:100%; padding:8px 10px; border:1.5px solid var(--borde); border-radius:7px;
+    font-size:0.85rem; font-family:inherit; resize:vertical;
+  }
+  .admin-form-row input:focus, .admin-form-row select:focus, .admin-form-row textarea:focus { outline:none; border-color:var(--verde); }
+  .admin-stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:10px; margin-bottom:18px; }
+  .admin-stat-box { background:white; border:1px solid var(--borde); border-radius:10px; padding:12px; text-align:center; }
+  .admin-stat-box .n { font-size:1.8rem; font-weight:700; color:var(--verde); }
+  .admin-stat-box .l { font-size:0.72rem; color:#888; margin-top:2px; }
+  .admin-tema-chip { display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:600; margin-left:6px; }
+  .admin-filtro { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; align-items:center; }
+  .admin-filtro select, .admin-filtro input { padding:6px 10px; border:1px solid var(--borde); border-radius:7px; font-size:0.83rem; background:white; }
+  .admin-filtro input { flex:1; min-width:160px; }
+
   @media (max-width: 600px) {
     /* Header */
     .header-tree { font-size: 2rem; }
@@ -551,6 +592,7 @@
     <div class="badge-stat" onclick="mostrarPantalla('resumen')" id="badge-aciertos">✅ 0 aciertos</div>
     <div class="badge-stat" onclick="mostrarPantalla('resumen')" id="badge-errores">❌ 0 errores</div>
     <button class="btn-auth" id="btn-login" onclick="abrirModalAuth()">👤 Ingresar</button>
+    <button class="btn-auth" id="btn-admin" onclick="mostrarPantalla('admin')" style="display:none;background:rgba(245,124,0,0.3);border-color:rgba(245,124,0,0.6)">🔧 Admin</button>
     <button class="btn-auth logout" id="btn-logout" onclick="cerrarSesion()" style="display:none">Salir 👋</button>
   </div>
 </header>
@@ -937,6 +979,87 @@
   </div>
 </div>
 
+<!-- ADMIN -->
+<div id="pantalla-admin" class="screen">
+  <div class="card" style="border-left:4px solid var(--naranja)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <span style="font-size:1.8rem">🔧</span>
+      <div><h2 style="color:var(--naranja);margin-bottom:2px">Panel Administrador</h2>
+      <p style="font-size:0.82rem;color:#888">Gestioná todas las preguntas y contenido de IngeAPP</p></div>
+    </div>
+    <div class="admin-stats-row" id="admin-stats-row"></div>
+  </div>
+
+  <div class="card" style="padding-bottom:8px">
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="adminCambiarTab('mc',this)">📝 Opción múltiple</button>
+      <button class="admin-tab" onclick="adminCambiarTab('vf',this)">✅❌ Verdadero/Falso</button>
+      <button class="admin-tab" onclick="adminCambiarTab('completar',this)">✏️ Completar</button>
+      <button class="admin-tab" onclick="adminCambiarTab('flash',this)">🃏 Flashcards</button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="admin-filtro">
+      <select id="admin-filtro-tema" onchange="adminRenderizarLista()">
+        <option value="">Todos los temas</option>
+        <option value="gases">🔥 Gases</option>
+        <option value="nociones">⚗️ Nociones</option>
+        <option value="reguladores">⚙️ Reguladores</option>
+        <option value="herramientas">🔩 Herramental</option>
+        <option value="civil">🏗️ Civil</option>
+      </select>
+      <input type="text" id="admin-filtro-buscar" placeholder="🔍 Buscar pregunta..." oninput="adminRenderizarLista()">
+      <button class="btn-accion primario" onclick="adminMostrarFormNueva()" style="padding:6px 14px;font-size:0.85rem">+ Nueva pregunta</button>
+    </div>
+
+    <!-- Formulario nueva pregunta (oculto por defecto) -->
+    <div class="admin-add-form" id="admin-form-nueva" style="display:none">
+      <h4 id="admin-form-titulo">➕ Nueva pregunta</h4>
+      <input type="hidden" id="admin-edit-id">
+      <div class="admin-form-row cols2">
+        <div><label>Tema</label>
+          <select id="nq-tema">
+            <option value="gases">Gases</option><option value="nociones">Nociones</option>
+            <option value="reguladores">Reguladores</option><option value="herramientas">Herramental</option>
+            <option value="civil">Civil</option>
+          </select></div>
+        <div id="nq-correcta-wrap"><label id="nq-correcta-label">Opción correcta (0-3)</label>
+          <input type="number" id="nq-correcta" min="0" max="3" value="0"></div>
+      </div>
+      <div class="admin-form-row">
+        <div><label id="nq-texto-label">Pregunta</label>
+          <textarea id="nq-texto" rows="2" placeholder="Escribí la pregunta aquí..."></textarea></div>
+      </div>
+      <div id="nq-opciones-wrap">
+        <div class="admin-form-row cols2">
+          <div><label>Opción A</label><input type="text" id="nq-op0" placeholder="Opción A"></div>
+          <div><label>Opción B</label><input type="text" id="nq-op1" placeholder="Opción B"></div>
+        </div>
+        <div class="admin-form-row cols2">
+          <div><label>Opción C</label><input type="text" id="nq-op2" placeholder="Opción C"></div>
+          <div><label>Opción D</label><input type="text" id="nq-op3" placeholder="Opción D"></div>
+        </div>
+      </div>
+      <div class="admin-form-row" id="nq-respuesta-wrap" style="display:none">
+        <div><label>Respuesta (para flashcard)</label>
+          <textarea id="nq-respuesta" rows="2" placeholder="Respuesta completa..."></textarea></div>
+      </div>
+      <div class="admin-form-row">
+        <div><label>Explicación / Feedback</label>
+          <textarea id="nq-exp" rows="2" placeholder="Explicación que aparece después de responder..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn-accion primario" onclick="adminGuardarPregunta()">💾 Guardar</button>
+        <button class="btn-accion secundario" onclick="document.getElementById('admin-form-nueva').style.display='none'">Cancelar</button>
+      </div>
+      <div id="admin-form-msg" style="font-size:0.82rem;margin-top:8px"></div>
+    </div>
+
+    <!-- Lista de preguntas -->
+    <div id="admin-lista"></div>
+  </div>
+</div>
+
 </main>
 
 <div class="fab" id="fab-resumen">
@@ -973,17 +1096,23 @@ function initSupabase() {
   } catch(e) { console.warn('Supabase init error:', e); }
 }
 
+const ADMIN_EMAILS = ['davidotero.darien@gmail.com'];
+function esAdmin() { return _usuario && ADMIN_EMAILS.includes(_usuario.email); }
+
 function actualizarUIAuth() {
   const btnLogin  = document.getElementById('btn-login');
   const btnLogout = document.getElementById('btn-logout');
+  const btnAdmin  = document.getElementById('btn-admin');
   if (_usuario) {
     const nombre = _usuario.email.split('@')[0];
     btnLogin.style.display  = 'none';
     btnLogout.style.display = '';
     btnLogout.textContent   = `${nombre} · Salir`;
+    if (btnAdmin) btnAdmin.style.display = esAdmin() ? '' : 'none';
   } else {
     btnLogin.style.display  = '';
     btnLogout.style.display = 'none';
+    if (btnAdmin) btnAdmin.style.display = 'none';
   }
 }
 
@@ -1343,6 +1472,10 @@ function mostrarPantalla(id) {
     document.getElementById('sim-intro').style.display = '';
     document.getElementById('sim-activo').style.display = 'none';
     document.getElementById('sim-resultado').style.display = 'none';
+  }
+  if (id === 'admin') {
+    if (!esAdmin()) { mostrarPantalla('inicio'); return; }
+    adminInicializar();
   }
 }
 
@@ -2494,6 +2627,225 @@ function mostrarResultadoPractica() {
 }
 
 function volverModulos() { inicializarRefuerzo(); }
+
+// =========================================
+// PANEL ADMINISTRADOR
+// =========================================
+let adminTabActual = 'mc';
+let preguntasExtra = []; // cargadas desde Supabase
+
+async function adminInicializar() {
+  await adminCargarPreguntasExtra();
+  adminRenderizarStats();
+  adminRenderizarLista();
+  adminAdaptarFormulario();
+}
+
+async function adminCargarPreguntasExtra() {
+  if (!_sb) return;
+  try {
+    const { data } = await _sb.from('preguntas_extra').select('*').eq('activa', true);
+    preguntasExtra = data || [];
+  } catch(e) { console.warn('Error cargando preguntas extra:', e); }
+}
+
+function adminRenderizarStats() {
+  const custom = preguntasExtra.length;
+  document.getElementById('admin-stats-row').innerHTML = `
+    <div class="admin-stat-box"><div class="n">${preguntas.length}</div><div class="l">📝 Múltiple</div></div>
+    <div class="admin-stat-box"><div class="n">${preguntasVF.length}</div><div class="l">✅❌ V/F</div></div>
+    <div class="admin-stat-box"><div class="n">${preguntasCompletar.length}</div><div class="l">✏️ Completar</div></div>
+    <div class="admin-stat-box"><div class="n">${flashcards.length}</div><div class="l">🃏 Flash</div></div>
+    <div class="admin-stat-box"><div class="n" style="color:var(--naranja)">${custom}</div><div class="l">⭐ Personalizadas</div></div>`;
+}
+
+function adminCambiarTab(tab, btn) {
+  adminTabActual = tab;
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('admin-form-nueva').style.display = 'none';
+  adminAdaptarFormulario();
+  adminRenderizarLista();
+}
+
+function adminAdaptarFormulario() {
+  const esFlash     = adminTabActual === 'flash';
+  const esVF        = adminTabActual === 'vf';
+  const esCompletar = adminTabActual === 'completar';
+  document.getElementById('nq-opciones-wrap').style.display   = (esFlash || esVF) ? 'none' : '';
+  document.getElementById('nq-respuesta-wrap').style.display  = esFlash ? '' : 'none';
+  document.getElementById('nq-correcta-wrap').style.display   = esFlash ? 'none' : '';
+  if (esVF) {
+    document.getElementById('nq-correcta-label').textContent = 'Correcto es (true/false)';
+    document.getElementById('nq-correcta').placeholder = 'true o false';
+    document.getElementById('nq-correcta').removeAttribute('max');
+    document.getElementById('nq-texto-label').textContent = 'Afirmación (Verdadero o Falso)';
+  } else if (esCompletar) {
+    document.getElementById('nq-correcta-label').textContent = 'Índice correcto (0-3)';
+    document.getElementById('nq-correcta').setAttribute('max','3');
+    document.getElementById('nq-texto-label').textContent = 'Enunciado (usá ___ para el espacio)';
+  } else if (!esFlash) {
+    document.getElementById('nq-correcta-label').textContent = 'Índice correcto (0-3)';
+    document.getElementById('nq-correcta').setAttribute('max','3');
+    document.getElementById('nq-texto-label').textContent = 'Pregunta';
+  } else {
+    document.getElementById('nq-texto-label').textContent = 'Concepto (frente de la tarjeta)';
+  }
+}
+
+function adminPoolActual() {
+  if (adminTabActual === 'vf')       return preguntasVF.map(q => ({...q, _fuente:'builtin'}));
+  if (adminTabActual === 'completar') return preguntasCompletar.map(q => ({...q, _fuente:'builtin'}));
+  if (adminTabActual === 'flash')    return flashcards.map(q => ({...q, _fuente:'builtin'}));
+  return preguntas.map(q => ({...q, _fuente:'builtin'}));
+}
+
+function adminRenderizarLista() {
+  const tema   = document.getElementById('admin-filtro-tema').value;
+  const buscar = (document.getElementById('admin-filtro-buscar').value || '').toLowerCase();
+
+  // Builtin + custom del tab actual
+  const customTab = preguntasExtra.filter(q => q.tipo === adminTabActual);
+  let pool = [
+    ...adminPoolActual(),
+    ...customTab.map(q => ({
+      id: q.id, tema: q.tema,
+      p: q.texto, texto: q.texto,
+      r: q.correcta, ops: q.opciones,
+      exp: q.explicacion, r_flash: q.respuesta,
+      _fuente: 'custom', _dbid: q.id
+    }))
+  ];
+
+  if (tema)   pool = pool.filter(q => q.tema === tema);
+  if (buscar) pool = pool.filter(q => (q.p||q.texto||'').toLowerCase().includes(buscar));
+
+  const total = pool.length;
+  const temaLabel = { gases:'🔥', nociones:'⚗️', reguladores:'⚙️', herramientas:'🔩', civil:'🏗️' };
+
+  document.getElementById('admin-lista').innerHTML = `
+    <p style="font-size:0.8rem;color:#888;margin-bottom:10px">${total} pregunta(s)</p>
+    ${pool.map(q => {
+      const esCustom = q._fuente === 'custom';
+      const textoQ = q.p || q.texto || '';
+      let respuestaLabel = '';
+      if (adminTabActual === 'vf')       respuestaLabel = q.r === true ? '✅ VERDADERO' : '❌ FALSO';
+      else if (adminTabActual === 'flash') respuestaLabel = (q.r || q.r_flash || '').toString().slice(0,80) + '...';
+      else if (q.ops)                     respuestaLabel = `✅ ${q.ops[q.r] || ''}`;
+      return `
+      <div class="admin-q-card">
+        <div class="admin-q-header">
+          <span class="admin-q-id ${esCustom?'custom':''}">${q.id}</span>
+          <span class="admin-q-texto">${textoQ}
+            <span class="admin-tema-chip" style="background:var(--verde-claro);color:var(--verde)">${temaLabel[q.tema]||''} ${q.tema}</span>
+          </span>
+        </div>
+        <div class="admin-q-respuesta">${respuestaLabel}</div>
+        <div class="admin-q-actions">
+          ${esCustom ? `
+            <button class="btn-admin-sm editar" onclick="adminEditarPregunta('${q._dbid}')">✏️ Editar</button>
+            <button class="btn-admin-sm eliminar" onclick="adminEliminarPregunta('${q._dbid}')">🗑️ Eliminar</button>
+          ` : '<span style="font-size:0.72rem;color:#bbb">Pregunta incorporada</span>'}
+        </div>
+      </div>`;
+    }).join('')}`;
+}
+
+function adminMostrarFormNueva() {
+  document.getElementById('admin-edit-id').value = '';
+  document.getElementById('admin-form-titulo').textContent = '➕ Nueva pregunta';
+  document.getElementById('nq-texto').value = '';
+  document.getElementById('nq-exp').value = '';
+  document.getElementById('nq-correcta').value = '0';
+  document.getElementById('nq-respuesta').value = '';
+  ['nq-op0','nq-op1','nq-op2','nq-op3'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('admin-form-msg').textContent = '';
+  document.getElementById('admin-form-nueva').style.display = '';
+  document.getElementById('nq-texto').focus();
+}
+
+async function adminGuardarPregunta() {
+  if (!_sb || !esAdmin()) return;
+  const msgEl = document.getElementById('admin-form-msg');
+  const texto = document.getElementById('nq-texto').value.trim();
+  const tema  = document.getElementById('nq-tema').value;
+  const exp   = document.getElementById('nq-exp').value.trim();
+  if (!texto) { msgEl.textContent = '⚠️ La pregunta no puede estar vacía.'; msgEl.style.color = 'var(--rojo)'; return; }
+
+  let correcta, opciones = null, respuesta = null;
+  if (adminTabActual === 'vf') {
+    const val = document.getElementById('nq-correcta').value.trim().toLowerCase();
+    correcta = (val === 'true' || val === '1' || val === 'verdadero');
+  } else if (adminTabActual === 'flash') {
+    respuesta = document.getElementById('nq-respuesta').value.trim();
+    correcta  = null;
+    if (!respuesta) { msgEl.textContent = '⚠️ Completá la respuesta.'; msgEl.style.color='var(--rojo)'; return; }
+  } else {
+    correcta = parseInt(document.getElementById('nq-correcta').value) || 0;
+    opciones = [
+      document.getElementById('nq-op0').value.trim(),
+      document.getElementById('nq-op1').value.trim(),
+      document.getElementById('nq-op2').value.trim(),
+      document.getElementById('nq-op3').value.trim(),
+    ];
+    if (opciones.some(o => !o)) { msgEl.textContent = '⚠️ Completá las 4 opciones.'; msgEl.style.color='var(--rojo)'; return; }
+  }
+
+  const editId = document.getElementById('admin-edit-id').value;
+  const prefijo = { mc:'eq', vf:'ev', completar:'ec', flash:'ef' }[adminTabActual];
+  const nuevoId = editId || `${prefijo}${Date.now()}`;
+
+  const row = {
+    id: nuevoId, tipo: adminTabActual, tema, texto,
+    opciones, correcta, respuesta, explicacion: exp, activa: true
+  };
+
+  msgEl.textContent = 'Guardando...'; msgEl.style.color = '#888';
+  try {
+    if (editId) {
+      await _sb.from('preguntas_extra').update(row).eq('id', editId);
+    } else {
+      await _sb.from('preguntas_extra').insert(row);
+    }
+    msgEl.textContent = '✅ Guardado correctamente.'; msgEl.style.color = 'var(--verde)';
+    await adminCargarPreguntasExtra();
+    adminRenderizarStats();
+    adminRenderizarLista();
+    setTimeout(() => { document.getElementById('admin-form-nueva').style.display = 'none'; }, 1200);
+  } catch(e) {
+    msgEl.textContent = '❌ Error al guardar: ' + e.message; msgEl.style.color = 'var(--rojo)';
+  }
+}
+
+function adminEditarPregunta(dbid) {
+  const q = preguntasExtra.find(p => p.id === dbid);
+  if (!q) return;
+  document.getElementById('admin-edit-id').value = dbid;
+  document.getElementById('admin-form-titulo').textContent = '✏️ Editar pregunta';
+  document.getElementById('nq-tema').value    = q.tema;
+  document.getElementById('nq-texto').value   = q.texto;
+  document.getElementById('nq-exp').value     = q.explicacion || '';
+  document.getElementById('nq-correcta').value = q.correcta !== null ? String(q.correcta) : '';
+  document.getElementById('nq-respuesta').value = q.respuesta || '';
+  if (q.opciones) {
+    ['nq-op0','nq-op1','nq-op2','nq-op3'].forEach((id,i) => {
+      document.getElementById(id).value = q.opciones[i] || '';
+    });
+  }
+  document.getElementById('admin-form-msg').textContent = '';
+  document.getElementById('admin-form-nueva').style.display = '';
+  document.getElementById('nq-texto').focus();
+}
+
+async function adminEliminarPregunta(dbid) {
+  if (!confirm('¿Eliminar esta pregunta?')) return;
+  try {
+    await _sb.from('preguntas_extra').update({ activa: false }).eq('id', dbid);
+    await adminCargarPreguntasExtra();
+    adminRenderizarStats();
+    adminRenderizarLista();
+  } catch(e) { alert('Error al eliminar: ' + e.message); }
+}
 
 // =========================================
 // INIT
