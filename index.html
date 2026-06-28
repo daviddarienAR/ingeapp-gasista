@@ -2737,46 +2737,33 @@ function stepsHTML(fase) {
 }
 
 function mostrarLeccion() {
-  const { tema, leccionIdx } = moduloActivo;
+  const { tema } = moduloActivo;
   const slides = lecciones[tema] || [];
-  const slide = slides[leccionIdx];
-  if (!slide) { iniciarPractica(); return; }
+  if (!slides.length) { iniciarPractica(); return; }
 
   document.getElementById('leccion-titulo').innerHTML = `${temasInfo[tema]?.icon} ${temaNombres[tema]} — Lección`;
   document.getElementById('leccion-steps').innerHTML = stepsHTML('leccion');
-  document.getElementById('leccion-contador').textContent = `Concepto ${leccionIdx+1} de ${slides.length}`;
+  document.getElementById('leccion-contador').textContent = `${slides.length} concepto${slides.length !== 1 ? 's' : ''} · Leé todo antes de practicar`;
 
-  document.getElementById('leccion-contenido').innerHTML = `
-    <div class="leccion-slide">
-      <div class="ls-titulo">${slide.titulo}</div>
-      <div class="ls-cuerpo">${slide.cuerpo}</div>
-    </div>`;
+  // Mostrar TODOS los conceptos juntos, scrollable
+  document.getElementById('leccion-contenido').innerHTML = slides.map((s, i) => `
+    <div class="leccion-slide" style="margin-bottom:18px;padding-bottom:18px;${i < slides.length-1 ? 'border-bottom:1px solid var(--borde)' : ''}">
+      <div class="ls-titulo">${s.titulo}</div>
+      <div class="ls-cuerpo">${s.cuerpo}</div>
+    </div>`).join('');
 
+  // Ocultar botón anterior (no aplica), configurar botón siguiente como "Comenzar práctica"
   const btnAnt = document.getElementById('leccion-btn-ant');
   const btnSig = document.getElementById('leccion-btn-sig');
-  btnAnt.style.display = leccionIdx === 0 ? 'none' : '';
-
-  const esUltimo = leccionIdx >= slides.length - 1;
-  btnSig.textContent = esUltimo ? '✏️ Pasar a la Práctica →' : 'Siguiente concepto →';
-  btnSig.className = 'btn-leccion ' + (esUltimo ? 'practicar' : 'siguiente');
-}
-
-function leccionSiguiente() {
-  const slides = lecciones[moduloActivo.tema] || [];
-  if (moduloActivo.leccionIdx >= slides.length - 1) {
-    iniciarPractica();
-  } else {
-    moduloActivo.leccionIdx++;
-    mostrarLeccion();
+  if (btnAnt) btnAnt.style.display = 'none';
+  if (btnSig) {
+    btnSig.textContent = '✏️ Ya leí todo — Comenzar Práctica →';
+    btnSig.className = 'btn-leccion practicar';
   }
 }
 
-function leccionAnterior() {
-  if (moduloActivo.leccionIdx > 0) {
-    moduloActivo.leccionIdx--;
-    mostrarLeccion();
-  }
-}
+function leccionSiguiente() { iniciarPractica(); }
+function leccionAnterior() {}
 
 function iniciarPractica() {
   document.getElementById('refuerzo-leccion').style.display = 'none';
