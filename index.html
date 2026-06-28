@@ -2432,6 +2432,10 @@ function renderizarResumen() {
     const falladasVF      = err0(preguntasVF);
     const falladasCP      = err0(preguntasCompletar);
     const falladasFlash   = err0(flashcards);
+    const bienQuiz        = bien0(preguntas);
+    const bienVF          = bien0(preguntasVF);
+    const bienCP          = bien0(preguntasCompletar);
+    const bienFlash       = bien0(flashcards);
 
     const totalFalladas = falladasQuiz.length + falladasVF.length + falladasCP.length + falladasFlash.length;
     const totalBien     = bien0(preguntas).length + bien0(preguntasVF).length + bien0(preguntasCompletar).length + bien0(flashcards).length;
@@ -2476,6 +2480,8 @@ function renderizarResumen() {
         ${totalBien > 0 ? `
           <p style="font-size:0.82rem;font-weight:600;color:var(--verde);margin:${totalFalladas?'12px':0} 0 6px">✅ ${totalBien} correctas</p>
           ${bienQuiz.map(q=>`<div class="ok-item">📝 ${q.p}</div>`).join('')}
+          ${bienVF.map(q=>`<div class="ok-item">✅❌ ${q.p}</div>`).join('')}
+          ${bienCP.map(q=>`<div class="ok-item">✏️ ${q.texto}</div>`).join('')}
           ${bienFlash.map(f=>`<div class="ok-item">🃏 ${f.p}</div>`).join('')}` : ''}
         ${totalNoVistas > 0 ? `
           <p style="font-size:0.8rem;color:#999;margin-top:10px">⬜ ${totalNoVistas} no vistas aún</p>` : ''}
