@@ -1587,6 +1587,7 @@ function actualizarBadges() {
   document.getElementById('badge-errores').textContent = `❌ ${totalErrores} errores`;
   const fab = document.getElementById('fab-errores-count');
   fab.textContent = totalErrores > 0 ? `${totalErrores} errores — Ver resumen` : 'Ver resumen';
+  actualizarBotonesExtra();
 }
 
 // =========================================
@@ -1773,7 +1774,15 @@ function mostrarResultado() {
 
   const fc = document.getElementById('resultado-fallos-container');
   if (sesionFallos.length > 0) {
-    fc.innerHTML = `<div class="resultado-detalle"><h4>📌 Preguntas para repasar:</h4><ul class="fallos-list">${sesionFallos.map(f=>`<li>${f}</li>`).join('')}</ul></div>`;
+    fc.innerHTML = `
+      <div class="resultado-detalle">
+        <h4>📌 ${sesionFallos.length} para repasar:</h4>
+        <ul class="fallos-list">${sesionFallos.map(f=>`<li>${f}</li>`).join('')}</ul>
+        <div style="margin-top:12px;padding:10px 14px;background:var(--verde-claro);border-radius:8px;border-left:3px solid var(--verde);font-size:0.85rem;color:var(--verde-oscuro)">
+          ✅ <strong>Guardadas en tu Resumen y Refuerzo.</strong> Podés repasar estas preguntas cuando quieras.
+        </div>
+        <button class="btn-accion primario" style="margin-top:10px;width:100%;background:#e63946" onclick="iniciarModoErrores()">⚡ Repasar solo mis errores ahora</button>
+      </div>`;
   } else {
     fc.innerHTML = '<div style="color:var(--verde);font-weight:600;margin:10px 0">✅ ¡Sin errores en esta sesión!</div>';
   }
@@ -1866,9 +1875,19 @@ function mostrarResultadoVF() {
   document.getElementById('resultado-emoji').textContent = pct >= 80 ? '🏆' : pct >= 60 ? '💪' : '📖';
   document.getElementById('resultado-msg').textContent = pct >= 80 ? '¡Excelente dominio de V/F!' : pct >= 60 ? '¡Bien! Revisá las que fallaste.' : 'Repasá los conceptos en Refuerzo.';
   const fc = document.getElementById('resultado-fallos-container');
-  fc.innerHTML = sesionFallos.length > 0
-    ? `<div class="resultado-detalle"><h4>📌 Para repasar:</h4><ul class="fallos-list">${sesionFallos.map(f=>`<li>${f}</li>`).join('')}</ul></div>`
-    : '<div style="color:var(--verde);font-weight:600">✅ ¡Sin errores!</div>';
+  if (sesionFallos.length > 0) {
+    fc.innerHTML = `
+      <div class="resultado-detalle">
+        <h4>📌 ${sesionFallos.length} para repasar:</h4>
+        <ul class="fallos-list">${sesionFallos.map(f=>`<li>${f}</li>`).join('')}</ul>
+        <div style="margin-top:12px;padding:10px 14px;background:var(--verde-claro);border-radius:8px;border-left:3px solid var(--verde);font-size:0.85rem;color:var(--verde-oscuro)">
+          ✅ <strong>Guardadas en tu Resumen y Refuerzo.</strong> Podés repasar estas preguntas cuando quieras.
+        </div>
+        <button class="btn-accion primario" style="margin-top:10px;width:100%;background:#e63946" onclick="iniciarModoErrores()">⚡ Repasar solo mis errores ahora</button>
+      </div>`;
+  } else {
+    fc.innerHTML = '<div style="color:var(--verde);font-weight:600">✅ ¡Sin errores!</div>';
+  }
   document.getElementById('btn-siguiente').onclick = null;
   document.querySelectorAll('.resultado-btns .btn-accion')[0].onclick = () => iniciarVF(vfEstado.tema);
   renderizarInicio();
@@ -1943,9 +1962,19 @@ function mostrarResultadoCompletar() {
   document.getElementById('resultado-emoji').textContent = pct >= 80 ? '🏆' : pct >= 60 ? '💪' : '📖';
   document.getElementById('resultado-msg').textContent = pct >= 80 ? '¡Excelente! Dominás los conceptos.' : '¡Revisá los espacios en blanco que fallaste!';
   const fc = document.getElementById('resultado-fallos-container');
-  fc.innerHTML = sesionFallos.length > 0
-    ? `<div class="resultado-detalle"><h4>📌 Para repasar:</h4><ul class="fallos-list">${sesionFallos.map(f=>`<li>${f.replace('___','[ ? ]')}</li>`).join('')}</ul></div>`
-    : '<div style="color:var(--verde);font-weight:600">✅ ¡Completaste todo correctamente!</div>';
+  if (sesionFallos.length > 0) {
+    fc.innerHTML = `
+      <div class="resultado-detalle">
+        <h4>📌 ${sesionFallos.length} para repasar:</h4>
+        <ul class="fallos-list">${sesionFallos.map(f=>`<li>${f.replace('___','[ ? ]')}</li>`).join('')}</ul>
+        <div style="margin-top:12px;padding:10px 14px;background:var(--verde-claro);border-radius:8px;border-left:3px solid var(--verde);font-size:0.85rem;color:var(--verde-oscuro)">
+          ✅ <strong>Guardadas en tu Resumen y Refuerzo.</strong> Podés repasar estas preguntas cuando quieras.
+        </div>
+        <button class="btn-accion primario" style="margin-top:10px;width:100%;background:#e63946" onclick="iniciarModoErrores()">⚡ Repasar solo mis errores ahora</button>
+      </div>`;
+  } else {
+    fc.innerHTML = '<div style="color:var(--verde);font-weight:600">✅ ¡Completaste todo correctamente!</div>';
+  }
   document.getElementById('btn-siguiente').onclick = null;
   document.querySelectorAll('.resultado-btns .btn-accion')[0].onclick = () => iniciarCompletar(completarEstado.tema);
   renderizarInicio();
@@ -2241,7 +2270,11 @@ function mostrarResumenFlash() {
   const lista = document.getElementById('flash-no-sabia-lista');
   if (noSabidas.length > 0) {
     lista.innerHTML = `<h4>📌 Conceptos para repasar (${noSabidas.length}):</h4>` +
-      noSabidas.map(p => `<div class="flash-no-sabia-item">• ${p}</div>`).join('');
+      noSabidas.map(p => `<div class="flash-no-sabia-item">• ${p}</div>`).join('') +
+      `<div style="margin-top:12px;padding:10px 14px;background:var(--verde-claro);border-radius:8px;border-left:3px solid var(--verde);font-size:0.85rem;color:var(--verde-oscuro)">
+        ✅ <strong>Guardadas en tu Resumen y Refuerzo.</strong> Podés repasar estas tarjetas cuando quieras.
+      </div>
+      <button class="btn-accion primario" style="margin-top:10px;width:100%;background:#e63946" onclick="iniciarModoErrores()">⚡ Repasar solo mis errores ahora</button>`;
     document.getElementById('btn-repetir-no-sabidas').style.display = '';
   } else {
     lista.innerHTML = '<p style="color:var(--verde);font-weight:600;margin-top:8px">✅ ¡Sabías todas las tarjetas!</p>';
